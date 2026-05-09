@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family:
+    'DM Sans',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  background: #f5f2e8;
+  color: #3d2b1f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+.dash-serif {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}

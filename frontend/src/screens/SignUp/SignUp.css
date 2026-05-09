@@ -1,0 +1,140 @@
+/* ===== ROLE SELECTOR ===== */
+.role-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+/* CARD */
+.role-card {
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  position: relative;
+}
+
+/* ICON */
+.role-icon {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 10px;
+  border-radius: 12px;
+  background: rgba(37, 99, 235, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.role-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: #2563eb;
+}
+
+/* TEXT */
+.role-card h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.role-card p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+/* HOVER */
+.role-card:hover {
+  transform: translateY(-3px);
+  border-color: #2563eb;
+}
+
+/* ACTIVE STATE */
+.role-card.active {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.12);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.18);
+}
+
+/* ICON ANIMATION */
+.role-card.active .role-icon {
+  background: #2563eb;
+  transform: scale(1.05);
+}
+
+.role-card.active .role-icon svg {
+  fill: #fff;
+}
+
+/* ===== SIGNIN LINK ===== */
+.signin-link {
+  margin-top: 22px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.signin-link a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.signin-link a:hover {
+  color: #1d4ed8;
+}
+
+/* ===== ERROR ===== */
+.form-error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+/* INPUT GROUP */
+.input-group {
+  display: flex;
+  align-items: center;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  padding: 0 14px;
+  transition: 0.25s ease;
+}
+
+.input-group:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.input-icon {
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: #2563eb;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.input-group input::placeholder {
+  color: #64748b;
+}

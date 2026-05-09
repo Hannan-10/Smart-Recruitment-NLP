@@ -1,0 +1,51 @@
+.saved-page {
+  padding: 32px;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  min-height: 100vh;
+  color: #0f172a;
+}
+
+.saved-page .page-intro {
+  margin: 0 0 28px;
+  color: #475569;
+  font-size: 16px;
+}
+
+.job-list-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.job-list-stack > * {
+  background: #ffffff !important;
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  border-radius: 18px !important;
+  padding: 24px !important;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08) !important;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.job-list-stack > *:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(37, 99, 235, 0.35) !important;
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.12) !important;
+}
+
+.job-list-stack > * .job-card-body h3,
+.job-list-stack > * .company,
+.job-list-stack > * .location,
+.job-list-stack > * .date {
+  color: #0f172a !important;
+}
+
+.job-list-stack > * .job-type {
+  background: rgba(148, 163, 184, 0.18) !important;
+  color: #475569 !important;
+}
+
+@media (max-width: 900px) {
+  .saved-page {
+    padding: 20px;
+  }
+}

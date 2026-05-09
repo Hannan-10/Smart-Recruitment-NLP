@@ -1,0 +1,92 @@
+/* SEARCH */
+.job-search {
+  padding: 12px 16px;
+  border-radius: 14px;
+  outline: none;
+
+  width: 260px;
+
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 500;
+
+  transition: all 0.2s ease;
+}
+
+.job-search::placeholder {
+  color: #64748b;
+}
+
+.job-search:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* FILTERS */
+.job-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+
+  background: #f1f5f9;
+  color: #334155;
+
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background: #e0e7ff;
+  border-color: #6366f1;
+  color: #3730a3;
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+}
+
+/* VISIBILITY CARD — FIXED (NO MORE DULL BLACK) */
+.visibility-card {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border-radius: 18px;
+  padding: 20px;
+
+  margin-bottom: 22px;
+
+  color: #fff;
+
+  box-shadow: 0 14px 40px rgba(37, 99, 235, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.visibility-card:hover {
+  transform: translateY(-3px);
+}
+
+.visibility-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.visibility-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #e0e7ff;
+}

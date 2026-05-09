@@ -1,0 +1,108 @@
+/* ===== HEADER ===== */
+.otp-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.otp-icon {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 10px;
+  border-radius: 14px;
+  background: rgba(37, 99, 235, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.otp-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: #2563eb;
+}
+
+.otp-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #0f172a;
+}
+
+.otp-header p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+/* ===== OTP ROW (FIXED PROPERLY) ===== */
+.otp-group {
+  display: flex;
+  justify-content: center;   /* 🔥 IMPORTANT FIX */
+  gap: 12px;
+  margin: 18px 0;
+}
+
+/* BOXES */
+.otp-box {
+  width: 48px;
+  height: 56px;
+  text-align: center;
+  font-size: 20px;
+  border-radius: 10px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+/* Focus */
+.otp-box:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+  transform: translateY(-2px);
+}
+
+/* TIMER */
+.otp-timer {
+  text-align: center;
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 10px;
+}
+
+.otp-timer span {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* RESEND */
+.resend-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.resend-btn:hover {
+  color: #1d4ed8;
+}
+
+/* FOOTER */
+.auth-footer-link {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.auth-footer-link span {
+  color: #64748b;
+}
+
+/* ERROR */
+.form-error {
+  text-align: center;
+  color: #f87171;
+  font-size: 13px;
+}

@@ -1,0 +1,29 @@
+.edit-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.edit-profile-form textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
