@@ -22,6 +22,15 @@ const applicationSchema = mongoose.Schema(
       type: String,
       default: '',
     },
+    aiScore: {
+      type: Number,
+      default: null,
+    },
+    aiBreakdown: {
+      semantic:    { type: Number },
+      skill_match: { type: Number },
+      experience:  { type: Number },
+    },
   },
   { timestamps: true }
 );

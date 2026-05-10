@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
 const asyncHandler = require('express-async-handler');
 const Job = require('../models/Job');
 const User = require('../models/User');
@@ -119,6 +120,44 @@ const applyJob = asyncHandler(async (req, res) => {
   res.json({ message: 'Application submitted' });
 });
 
+// ── AI scoring helper (calls Python Flask service on port 5001) ───────────────
+function callAIService(jdText, applications) {
+  return new Promise((resolve) => {
+    const payload = JSON.stringify({
+      job_description: jdText,
+      applications: applications.map((a) => ({
+        id: a._id.toString(),
+        cv_path: a.cvPath || null,
+      })),
+    });
+
+    const options = {
+      hostname: 'localhost',
+      port: 5001,
+      path: '/score-cvs',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload),
+      },
+    };
+
+    const req = http.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch { resolve(null); }
+      });
+    });
+
+    req.on('error', () => resolve(null));
+    req.setTimeout(120000, () => { req.destroy(); resolve(null); });
+    req.write(payload);
+    req.end();
+  });
+}
+
 const getJobApplicants = asyncHandler(async (req, res) => {
   const job = await Job.findById(req.params.id);
   if (!job) {
@@ -130,9 +169,46 @@ const getJobApplicants = asyncHandler(async (req, res) => {
     throw new Error('Not authorized');
   }
 
-  const applications = await Application.find({ job: req.params.id })
+  let applications = await Application.find({ job: req.params.id })
     .populate('applicant', 'firstName lastName email skills experience bio location')
-    .sort({ createdAt: -1 });
+    .lean();
+
+  // Score any applications that haven't been scored yet
+  const unscored = applications.filter((a) => a.aiScore === null || a.aiScore === undefined);
+
+  if (unscored.length > 0) {
+    const jdText = [job.title, job.category, job.description, ...(job.requirements || [])]
+      .filter(Boolean)
+      .join(' ');
+
+    const scores = await callAIService(jdText, unscored);
+
+    if (scores && Array.isArray(scores)) {
+      await Promise.all(
+        scores.map((s) =>
+          Application.findByIdAndUpdate(s.id, {
+            aiScore: s.score,
+            aiBreakdown: s.breakdown,
+          })
+        )
+      );
+
+      // Merge scores into the in-memory results
+      const scoreMap = Object.fromEntries(scores.map((s) => [s.id, s]));
+      applications = applications.map((a) => {
+        const s = scoreMap[a._id.toString()];
+        return s ? { ...a, aiScore: s.score, aiBreakdown: s.breakdown } : a;
+      });
+    }
+  }
+
+  // Sort: scored apps descending by score, unscored at the end
+  applications.sort((a, b) => {
+    if (a.aiScore == null && b.aiScore == null) return 0;
+    if (a.aiScore == null) return 1;
+    if (b.aiScore == null) return -1;
+    return b.aiScore - a.aiScore;
+  });
 
   res.json(applications);
 });

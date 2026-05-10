@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import {
   FiBriefcase, FiMapPin, FiUsers, FiArrowUp, FiDownload,
-  FiX, FiSearch, FiFileText, FiAlertCircle,
+  FiX, FiSearch, FiFileText, FiAlertCircle, FiCpu,
 } from 'react-icons/fi'
 import './Applicants.css'
 
@@ -63,9 +63,10 @@ function Applicants() {
   const handleSortTopCVs = () => {
     setApplications((prev) =>
       [...prev].sort((a, b) => {
-        const scoreA = a.applicant?.skills?.length || 0
-        const scoreB = b.applicant?.skills?.length || 0
-        return scoreB - scoreA
+        if (a.aiScore == null && b.aiScore == null) return 0
+        if (a.aiScore == null) return 1
+        if (b.aiScore == null) return -1
+        return b.aiScore - a.aiScore
       })
     )
     setSorted(true)
@@ -201,15 +202,22 @@ function Applicants() {
               const applicant = app.applicant || {}
               const name = `${applicant.firstName || ''} ${applicant.lastName || ''}`.trim() || 'Unknown'
               const skills = Array.isArray(applicant.skills) ? applicant.skills : []
+              const hasScore = app.aiScore !== null && app.aiScore !== undefined
+              const scoreColor = !hasScore ? '#94a3b8'
+                : app.aiScore >= 75 ? '#10b981'
+                : app.aiScore >= 50 ? '#f59e0b'
+                : '#ef4444'
 
               return (
                 <div key={app._id} className="cv-item">
-                  <div className="cv-rank-badge">
-                    <span className="rank-num">{index + 1}</span>
+                  {/* RANK BADGE */}
+                  <div className="cv-rank-badge" style={{ borderColor: scoreColor }}>
+                    <span className="rank-num" style={{ color: scoreColor }}>{index + 1}</span>
                     <span className="rank-label">Rank</span>
                   </div>
 
                   <div className="cv-content">
+                    {/* TOP ROW: info + AI score */}
                     <div className="cv-info-main">
                       <div className="cv-user-info">
                         <h4>{name}</h4>
@@ -222,11 +230,63 @@ function Applicants() {
                         )}
                       </div>
 
-                      {applicant.bio && (
-                        <p className="cv-bio">{applicant.bio}</p>
-                      )}
+                      {/* AI SCORE PANEL */}
+                      <div className="ai-score-panel">
+                        <div className="ai-score-header">
+                          <FiCpu className="ai-icon" />
+                          <span className="ai-label">AI Match Score</span>
+                        </div>
+
+                        {hasScore ? (
+                          <>
+                            <div className="ai-score-big" style={{ color: scoreColor }}>
+                              {app.aiScore}%
+                            </div>
+                            <div className="ai-score-bar-wrap">
+                              <div
+                                className="ai-score-bar-fill"
+                                style={{ width: `${app.aiScore}%`, background: scoreColor }}
+                              />
+                            </div>
+
+                            {app.aiBreakdown && (
+                              <div className="ai-breakdown">
+                                <div className="breakdown-row">
+                                  <span>Semantic</span>
+                                  <div className="mini-bar">
+                                    <div style={{ width: `${app.aiBreakdown.semantic}%` }} />
+                                  </div>
+                                  <span className="breakdown-val">{app.aiBreakdown.semantic}%</span>
+                                </div>
+                                <div className="breakdown-row">
+                                  <span>Skill Match</span>
+                                  <div className="mini-bar">
+                                    <div style={{ width: `${app.aiBreakdown.skill_match}%` }} />
+                                  </div>
+                                  <span className="breakdown-val">{app.aiBreakdown.skill_match}%</span>
+                                </div>
+                                <div className="breakdown-row">
+                                  <span>Experience</span>
+                                  <div className="mini-bar">
+                                    <div style={{ width: `${app.aiBreakdown.experience}%` }} />
+                                  </div>
+                                  <span className="breakdown-val">{app.aiBreakdown.experience}%</span>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <p className="ai-score-na">
+                            {appsLoading ? 'Scoring…' : 'N/A — no CV or service offline'}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
+                    {/* BIO */}
+                    {applicant.bio && <p className="cv-bio">{applicant.bio}</p>}
+
+                    {/* FOOTER: skills + actions */}
                     <div className="cv-footer">
                       <div className="cv-tags">
                         {skills.length > 0

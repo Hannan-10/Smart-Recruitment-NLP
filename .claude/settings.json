@@ -13,7 +13,38 @@
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\HP\\\\Documents\\\\GitHub\\\\Smart-Recruitment-NLP\" -Recurse -Directory)",
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\HP\\\\Documents\\\\GitHub\\\\Smart-Recruitment-NLP\" -Force)",
-      "Bash(Select-Object Name, PSIsContainer)"
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(python -m pip show torch)",
+      "Bash(python -m pip uninstall torch torchvision torchaudio -y)",
+      "Bash(python -m pip install torch --index-url https://download.pytorch.org/whl/cpu)",
+      "Bash(python -c \"import torch; print\\('torch OK, version:', torch.__version__, '| CUDA:', torch.cuda.is_available\\(\\)\\)\")",
+      "Bash(python ai_service.py)",
+      "Bash(python -c \"import torch; print\\(torch.__version__\\)\")",
+      "Bash(python -c \"import torch; print\\('torch ok:', torch.__version__, '| CUDA:', torch.cuda.is_available\\(\\)\\)\")",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(python -c \"from sentence_transformers import SentenceTransformer; print\\('OK'\\)\")",
+      "Bash(curl -s http://localhost:5001/health)",
+      "Read(//tmp/**)",
+      "Bash(python -c \"import inspect, torch; import torch._C; print\\('ok'\\)\")",
+      "Bash(python -c \"import sys; print\\(sys.path\\)\")",
+      "Bash(python -c \"import sys; print\\(sys.path\\)\" > /tmp/syspath_bg.txt 2>&1 & *)",
+      "Bash(python -c ' *)",
+      "Bash(cmd //c \"start /B python ai_service.py > C:/tmp/ai_svc.log 2>&1\")",
+      "Bash(cat /tmp/ai_svc.log)",
+      "Bash(cat \"C:/tmp/ai_svc.log\")",
+      "Read(//c/Windows/System32/**)",
+      "Read(//c/Users/HP/AppData/Local/Programs/Python/Python310/lib/site-packages/torch/lib/**)",
+      "Bash(grep -n \"_load_dll_libraries\\\\|c10.dll\\\\|AddDllDirectory\\\\|add_dll\" \"C:/Users/HP/AppData/Local/Programs/Python/Python310/lib/site-packages/torch/__init__.py\" 2>&1 | head -40)",
+      "Read(//c/Users/HP/AppData/Local/Programs/Python/Python310/lib/site-packages/torch/**)",
+      "Bash(find \"/c/Windows\" -name \"api-ms-win-crt-runtime-l1-1-0.dll\" 2>/dev/null | head -5 *)",
+      "Read(//c/Windows/**)",
+      "Bash(pip show *)",
+      "Bash(pip uninstall *)",
+      "Bash(pip install *)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
     ]
   }
 }
