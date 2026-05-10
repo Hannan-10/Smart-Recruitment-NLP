@@ -42,7 +42,7 @@ const INDUSTRY_OPTIONS = [
 ]
 
 function Onboarding() {
-  const { currentUser } = useAuth()
+  const { currentUser, getAccessToken } = useAuth()
   const navigate = useNavigate()
 
   const [step, setStep] = useState(1)
@@ -65,6 +65,7 @@ function Onboarding() {
   })
 
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!needsOnboarding()) {
@@ -83,10 +84,11 @@ function Onboarding() {
   const handlePhoto = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setForm((p) => ({
-      ...p,
-      photoPreview: URL.createObjectURL(file),
-    }))
+    const reader = new FileReader()
+    reader.onload = () => {
+      setForm((p) => ({ ...p, photoPreview: reader.result }))
+    }
+    reader.readAsDataURL(file)
   }
 
   const addSkill = (e) => {
@@ -112,7 +114,7 @@ function Onboarding() {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (isRecruiter) {
@@ -121,25 +123,64 @@ function Onboarding() {
         return
       }
     } else {
-      if (!form.bio || !form.experience || form.skills.length === 0) {
+      if (!form.bio || !form.experience || form.skills.length === 0 || !form.location) {
         setError('Please complete all required fields')
         return
       }
     }
 
-    const meta = getSignupMeta()
+    setError('')
+    setLoading(true)
 
-    setProfile({
-      email: currentUser.email,
-      firstName: meta?.firstName,
-      lastName: meta?.lastName,
-      ...form,
-    })
+    try {
+      const endpoint = isRecruiter ? '/api/onboarding/recruiter' : '/api/onboarding/applicant'
+      const payload = isRecruiter
+        ? {
+            companyName: form.companyName,
+            companySize: form.companySize,
+            industry: form.industry,
+            location: form.location,
+          }
+        : {
+            bio: form.bio,
+            experience: form.experience,
+            skills: form.skills,
+            location: form.location,
+          }
 
-    clearSignupMeta()
-    setNeedOnboarding(false)
+      const response = await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAccessToken()}`,
+        },
+        body: JSON.stringify(payload),
+      })
 
-    navigate(isRecruiter ? '/recruiter/dashboard' : '/applicant/jobs')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Onboarding failed')
+      }
+
+      const meta = getSignupMeta()
+
+      setProfile({
+        email: currentUser.email,
+        firstName: meta?.firstName,
+        lastName: meta?.lastName,
+        ...form,
+      })
+
+      clearSignupMeta()
+      setNeedOnboarding(false)
+
+      navigate(isRecruiter ? '/recruiter/dashboard' : '/applicant/jobs')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -322,8 +363,15 @@ function Onboarding() {
                 </>
               ) : (
                 <>
-                  <label className="label">Certifications (Optional)</label>
-                  <input type="file" multiple />
+                  <label className="label">Location</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. New York, USA"
+                    value={form.location}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, location: e.target.value }))
+                    }
+                  />
                 </>
               )}
             </div>
@@ -344,7 +392,9 @@ function Onboarding() {
                 Next
               </button>
             ) : (
-              <button type="submit">Finish Setup</button>
+              <button type="submit" disabled={loading}>
+                {loading ? 'Setting up...' : 'Finish Setup'}
+              </button>
             )}
           </div>
 

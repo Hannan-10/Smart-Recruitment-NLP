@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(netstat -ano)",
+      "Bash(findstr :5000)",
+      "Bash(taskkill /PID 16672 /F)",
+      "Bash(cmd /c \"taskkill /PID 16672 /F\")",
+      "Bash(cmd /c \"taskkill /PID 16672 /F 2>&1\")",
+      "Bash(cmd /c \"netstat -ano | findstr :5000\")",
+      "Bash(cmd /c \"taskkill /F /PID 16672\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\HP\\\\Documents\\\\GitHub\\\\Smart-Recruitment-NLP\" -Recurse -Directory)",
+      "Bash(Select-Object -First 20)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\HP\\\\Documents\\\\GitHub\\\\Smart-Recruitment-NLP\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)"
+    ]
+  }
+}

@@ -1,13 +1,26 @@
 const path = require('path');
-const express = require('express');
 const dotenv = require('dotenv');
+
+const envPath = path.join(__dirname, '.env');
+const envConfig = dotenv.config({ path: envPath });
+
+if (envConfig.error) {
+  console.error('.env file not found or error reading it:', envConfig.error);
+} else {
+  console.log('.env loaded successfully');
+  console.log('EMAIL_USER:', process.env.EMAIL_USER ? '✓ Set' : '✗ Not set');
+  console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Set' : '✗ Not set');
+  console.log('MONGO_URI:', process.env.MONGO_URI ? '✓ Set' : '✗ Not set');
+}
+
+const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const onboardingRoutes = require('./routes/onboardingRoutes');
 const jobRoutes = require('./routes/jobRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
-dotenv.config({ path: path.join(__dirname, '.env') });
 connectDB();
 
 const app = express();
@@ -19,12 +32,30 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/jobs', jobRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });

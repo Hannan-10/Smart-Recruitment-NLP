@@ -1,221 +1,228 @@
-import { useState } from 'react'
-import { FiUser, FiBriefcase, FiStar, FiEdit, FiSave, FiCamera } from 'react-icons/fi'
-import { images } from '../../assets'
+import { useState, useEffect, useCallback } from 'react'
+import { FiUser, FiBriefcase, FiEdit, FiSave, FiCamera, FiMapPin, FiUsers } from 'react-icons/fi'
+import { useAuth } from '../../context/AuthContext'
 import { getProfile, setProfile } from '../../utils/signupFlow'
-import './ApplicantProfile.css'
+import '../ApplicantProfile/ApplicantProfile.css'
 
 function RecruiterProfile() {
-  const getSkillList = (value) => {
-    if (Array.isArray(value)) return value.filter(Boolean)
-    if (typeof value === 'string') {
-      return value
-        .split(',')
-        .map((skill) => skill.trim())
-        .filter(Boolean)
-    }
-    return []
-  }
-
+  const { getAccessToken } = useAuth()
   const savedProfile = getProfile() || {}
-  const [profile, setProfileState] = useState(savedProfile)
+
+  const [profileData, setProfileData] = useState(savedProfile)
   const [editMode, setEditMode] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const [photoPreview, setPhotoPreview] = useState(savedProfile.photoPreview || '')
 
   const [form, setForm] = useState({
     firstName: savedProfile.firstName || '',
     lastName: savedProfile.lastName || '',
-    company: savedProfile.company || '',
-    experience: savedProfile.experience || '',
-    skills: getSkillList(savedProfile.skills),
+    companyName: savedProfile.companyName || '',
+    companySize: savedProfile.companySize || '',
+    industry: savedProfile.industry || '',
+    location: savedProfile.location || '',
   })
-
-  const [newSkill, setNewSkill] = useState('')
 
   const displayName = (form.firstName || form.lastName)
     ? `${form.firstName || ''} ${form.lastName || ''}`.trim()
-    : 'Your name'
+    : savedProfile.email?.split('@')[0] || 'Your Profile'
+
+  const fetchProfile = useCallback(async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/onboarding/profile', {
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      const merged = {
+        ...savedProfile,
+        firstName: data.firstName || savedProfile.firstName || '',
+        lastName: data.lastName || savedProfile.lastName || '',
+        email: data.email || savedProfile.email || '',
+        companyName: data.companyName || savedProfile.companyName || '',
+        companySize: data.companySize || savedProfile.companySize || '',
+        industry: data.industry || savedProfile.industry || '',
+        location: data.location || savedProfile.location || '',
+        photoPreview: savedProfile.photoPreview || '',
+      }
+      setProfileData(merged)
+      setForm({
+        firstName: merged.firstName,
+        lastName: merged.lastName,
+        companyName: merged.companyName,
+        companySize: merged.companySize,
+        industry: merged.industry,
+        location: merged.location,
+      })
+      setProfile(merged)
+    } catch {}
+    finally { setLoading(false) }
+  }, [getAccessToken])
+
+  useEffect(() => { fetchProfile() }, [fetchProfile])
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  const addSkill = () => {
-    const skill = newSkill.trim()
-    if (skill && !form.skills.includes(skill)) {
-      setForm((prev) => ({ ...prev, skills: [...prev.skills, skill] }))
-      setNewSkill('')
-    }
-  }
-
-  const removeSkill = (skillToRemove) => {
-    setForm((prev) => ({ ...prev, skills: prev.skills.filter(skill => skill !== skillToRemove) }))
-  }
-
-  const handleSkillKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault()
-      addSkill()
-    }
-  }
-
-  const handleSave = () => {
-    const updatedProfile = {
-      ...profile,
-      ...form,
-      photoPreview,
-    }
-    setProfile(updatedProfile)
-    setProfileState(updatedProfile)
-    setEditMode(false)
-  }
-
-  const handlePhotoUpload = (event) => {
-    const file = event.target.files[0]
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = () => {
-      setPhotoPreview(reader.result)
-    }
+    reader.onload = () => setPhotoPreview(reader.result)
     reader.readAsDataURL(file)
   }
 
-  const toggleEdit = () => {
-    if (editMode) {
-      handleSave()
-    } else {
-      setEditMode(true)
+  const handleSave = async () => {
+    setError('')
+    setSaving(true)
+    try {
+      const res = await fetch('http://localhost:5000/api/onboarding/recruiter', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAccessToken()}`,
+        },
+        body: JSON.stringify(form),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Update failed')
+      const updated = { ...profileData, ...form, photoPreview }
+      setProfile(updated)
+      setProfileData(updated)
+      setEditMode(false)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
     }
+  }
+
+  const cancelEdit = () => {
+    setForm({
+      firstName: profileData.firstName || '',
+      lastName: profileData.lastName || '',
+      companyName: profileData.companyName || '',
+      companySize: profileData.companySize || '',
+      industry: profileData.industry || '',
+      location: profileData.location || '',
+    })
+    setError('')
+    setEditMode(false)
+  }
+
+  if (loading) {
+    return (
+      <main className="dashboard-content profile-page">
+        <p className="profile-loading">Loading profile…</p>
+      </main>
+    )
   }
 
   return (
     <main className="dashboard-content profile-page">
+
+      {/* HERO */}
       <div className="profile-hero">
         <div className="profile-avatar-wrap">
           {photoPreview ? (
-            <img src={photoPreview} alt="Profile avatar" className="profile-hero-img" />
-          ) : profile?.photoPreview ? (
-            <img src={profile.photoPreview} alt="Profile avatar" className="profile-hero-img" />
-          ) : images.SignInImg ? (
-            <img src={images.SignInImg} alt="Profile avatar" className="profile-hero-img" />
+            <img src={photoPreview} alt="" className="profile-hero-img" />
           ) : (
-            <div className="profile-hero-placeholder">{displayName.charAt(0)}</div>
+            <div className="profile-hero-placeholder">
+              {displayName.charAt(0).toUpperCase()}
+            </div>
           )}
-
-          {editMode && (
-            <label className="photo-upload-btn">
-              <FiCamera />
-              <input type="file" accept="image/*" onChange={handlePhotoUpload} hidden />
-            </label>
-          )}
+          <label className="avatar-upload-label">
+            <FiCamera />
+            <input type="file" accept="image/*" onChange={handlePhotoUpload} className="photo-input" />
+          </label>
         </div>
 
-        <div className="profile-hero-info">
+        <div className="profile-hero-text">
           {editMode ? (
-            <div className="profile-name-edit">
-              <input
-                name="firstName"
-                value={form.firstName}
-                onChange={handleChange}
-                placeholder="First Name"
-              />
-              <input
-                name="lastName"
-                value={form.lastName}
-                onChange={handleChange}
-                placeholder="Last Name"
-              />
+            <div className="edit-name-row">
+              <input name="firstName" placeholder="First name" value={form.firstName} onChange={handleChange} className="edit-input" />
+              <input name="lastName" placeholder="Last name" value={form.lastName} onChange={handleChange} className="edit-input" />
             </div>
           ) : (
-            <h1>{displayName}</h1>
+            <h1 className="dash-serif">{displayName}</h1>
           )}
-          <p className="profile-role">
-            <FiBriefcase /> {form.company || 'Recruiter'}
-          </p>
-        </div>
 
-        <button className={`btn-profile-edit ${editMode ? 'saving' : ''}`} onClick={toggleEdit}>
-          {editMode ? (
-            <>
-              <FiSave /> Save Profile
-            </>
-          ) : (
-            <>
-              <FiEdit /> Edit Profile
-            </>
-          )}
-        </button>
-      </div>
-
-      <div className="profile-grid">
-        <div className="profile-section">
-          <div className="section-title">
-            <FiUser className="section-icon" />
-            <h3>About & Company</h3>
-          </div>
-          <div className="section-content">
-            {editMode ? (
-              <>
-                <div className="form-group">
-                  <label>Company Name</label>
-                  <input
-                    name="company"
-                    value={form.company}
-                    onChange={handleChange}
-                    placeholder="e.g., Tech Corp"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Experience & Background</label>
-                  <textarea
-                    name="experience"
-                    value={form.experience}
-                    onChange={handleChange}
-                    rows={5}
-                    placeholder="Describe your recruiting background..."
-                  />
-                </div>
-              </>
-            ) : (
-              <p className="profile-bio-text">
-                {form.experience || 'No experience details added yet.'}
-              </p>
+          <div className="profile-meta-row">
+            <div className="profile-chip">
+              <FiUser />
+              <span>{profileData.email || 'No email'}</span>
+            </div>
+            {profileData.companyName && (
+              <div className="profile-chip">
+                <FiBriefcase />
+                <span>{profileData.companyName}</span>
+              </div>
+            )}
+            {profileData.location && (
+              <div className="profile-chip">
+                <FiMapPin />
+                <span>{profileData.location}</span>
+              </div>
             )}
           </div>
-        </div>
 
-        <div className="profile-section">
-          <div className="section-title">
-            <FiStar className="section-icon" />
-            <h3>Hiring Expertise</h3>
+          <div className="profile-action-row">
+            <button onClick={editMode ? handleSave : () => setEditMode(true)} className="btn-profile-edit" disabled={saving}>
+              {editMode ? <FiSave /> : <FiEdit />}
+              {saving ? 'Saving…' : editMode ? 'Save Profile' : 'Edit Profile'}
+            </button>
+            {editMode && (
+              <button type="button" className="btn-profile-cancel" onClick={cancelEdit}>
+                Cancel
+              </button>
+            )}
           </div>
-          <div className="section-content">
-            <div className="skills-grid">
-              {form.skills.map((skill) => (
-                <div key={skill} className="skill-item">
-                  {skill}
-                  {editMode && (
-                    <button onClick={() => removeSkill(skill)} className="skill-remove-btn">
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-              {editMode && (
-                <div className="skill-add-wrap">
-                  <input
-                    value={newSkill}
-                    onChange={(e) => setNewSkill(e.target.value)}
-                    onKeyPress={handleSkillKeyPress}
-                    placeholder="Add expertise..."
-                  />
-                  <button onClick={addSkill} className="btn-skill-add">
-                    +
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+
+          {error && <p className="profile-error">{error}</p>}
         </div>
+      </div>
+
+      {/* CARDS */}
+      <div className="profile-grid">
+
+        <section className="info-card">
+          <h2><FiBriefcase /> Company</h2>
+          {editMode ? (
+            <input name="companyName" placeholder="e.g. Tech Corp" value={form.companyName} onChange={handleChange} className="edit-input edit-input--full" />
+          ) : (
+            <p>{profileData.companyName || 'No company added.'}</p>
+          )}
+        </section>
+
+        <section className="info-card">
+          <h2><FiMapPin /> Location</h2>
+          {editMode ? (
+            <input name="location" placeholder="e.g. New York, USA" value={form.location} onChange={handleChange} className="edit-input edit-input--full" />
+          ) : (
+            <p>{profileData.location || 'No location added.'}</p>
+          )}
+        </section>
+
+        <section className="info-card">
+          <h2><FiUsers /> Company Size</h2>
+          {editMode ? (
+            <input name="companySize" placeholder="e.g. 11-50" value={form.companySize} onChange={handleChange} className="edit-input edit-input--full" />
+          ) : (
+            <p>{profileData.companySize || 'Not specified.'}</p>
+          )}
+        </section>
+
+        <section className="info-card">
+          <h2><FiUser /> Industry</h2>
+          {editMode ? (
+            <input name="industry" placeholder="e.g. IT & Software" value={form.industry} onChange={handleChange} className="edit-input edit-input--full" />
+          ) : (
+            <p>{profileData.industry || 'Not specified.'}</p>
+          )}
+        </section>
+
       </div>
     </main>
   )

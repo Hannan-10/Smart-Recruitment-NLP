@@ -5,8 +5,29 @@ import { images } from '../../assets'
 import { setPendingSignup } from '../../utils/signupFlow'
 import './SignUp.css'
 
+function EyeOpen() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+function EyeOff() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  )
+}
+
 function SignUp() {
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -25,7 +46,7 @@ function SignUp() {
     }))
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
     if (formData.password !== formData.confirmPassword) {
@@ -34,15 +55,35 @@ function SignUp() {
     }
 
     setError('')
+    setLoading(true)
 
-    setPendingSignup({
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      role: formData.role,
-    })
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
 
-    navigate('/verify-otp')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Signup failed')
+      }
+
+      setPendingSignup({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+      })
+
+      navigate('/verify-otp')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -57,13 +98,11 @@ function SignUp() {
     >
       <form onSubmit={handleSubmit}>
 
-        {/* ROLE SELECTOR (UNCHANGED) */}
+        {/* ROLE SELECTOR */}
         <div className="role-selector">
           <div
             className={`role-card ${formData.role === 'applicant' ? 'active' : ''}`}
-            onClick={() =>
-              setFormData((prev) => ({ ...prev, role: 'applicant' }))
-            }
+            onClick={() => setFormData((prev) => ({ ...prev, role: 'applicant' }))}
           >
             <div className="role-icon">
               <svg viewBox="0 0 24 24">
@@ -76,9 +115,7 @@ function SignUp() {
 
           <div
             className={`role-card ${formData.role === 'recruiter' ? 'active' : ''}`}
-            onClick={() =>
-              setFormData((prev) => ({ ...prev, role: 'recruiter' }))
-            }
+            onClick={() => setFormData((prev) => ({ ...prev, role: 'recruiter' }))}
           >
             <div className="role-icon">
               <svg viewBox="0 0 24 24">
@@ -89,8 +126,6 @@ function SignUp() {
             <p>Post jobs & hire talent</p>
           </div>
         </div>
-
-        {/* ===== INPUTS WITH ICONS ===== */}
 
         {/* FIRST NAME */}
         <div className="input-group">
@@ -129,7 +164,17 @@ function SignUp() {
               <path d="M12 17a2 2 0 100-4 2 2 0 000 4zm6-7V8a6 6 0 10-12 0v2H5v10h14V10h-1zm-2 0H8V8a4 4 0 118 0v2z" />
             </svg>
           </span>
-          <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required />
+          <input
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+          <button type="button" className="eye-toggle" onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? <EyeOpen /> : <EyeOff />}
+          </button>
         </div>
 
         {/* CONFIRM PASSWORD */}
@@ -139,13 +184,23 @@ function SignUp() {
               <path d="M12 17a2 2 0 100-4 2 2 0 000 4zm6-7V8a6 6 0 10-12 0v2H5v10h14V10h-1zm-2 0H8V8a4 4 0 118 0v2z" />
             </svg>
           </span>
-          <input name="confirmPassword" type="password" placeholder="Confirm password" value={formData.confirmPassword} onChange={handleChange} required />
+          <input
+            name="confirmPassword"
+            type={showConfirmPassword ? 'text' : 'password'}
+            placeholder="Confirm password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+          />
+          <button type="button" className="eye-toggle" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+            {showConfirmPassword ? <EyeOpen /> : <EyeOff />}
+          </button>
         </div>
 
         {error ? <p className="form-error">{error}</p> : null}
 
-        <button type="submit" className="btn-auth-primary">
-          Create Account
+        <button type="submit" className="btn-auth-primary" disabled={loading}>
+          {loading ? 'Creating Account...' : 'Create Account'}
         </button>
       </form>
 

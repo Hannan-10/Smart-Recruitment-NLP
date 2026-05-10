@@ -6,6 +6,8 @@ import SignIn from './screens/SignIn'
 import SignUp from './screens/SignUp'
 import VerifyOTP from './screens/VerifyOTP'
 import ForgotPassword from './screens/ForgotPassword'
+import ForgotPasswordVerifyOTP from './screens/ForgotPasswordVerifyOTP'
+import ResetPassword from './screens/ResetPassword'
 import Onboarding from './screens/Onboarding'
 import RecruiterDashboard from './screens/RecruiterDashboard'
 import PostJob from './screens/PostJob'
@@ -21,6 +23,7 @@ import DeleteAccount from './screens/DeleteAccount'
 import RecruiterProfile from './screens/RecruiterProfile'
 import RecruiterSettings from './screens/RecruiterSettings'
 import RecruiterShell from './components/RecruiterShell'
+import RecruiterJobDetail from './screens/RecruiterJobDetail'
 
 function App() {
   return (
@@ -31,6 +34,8 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/forgot-password/verify" element={<ForgotPasswordVerifyOTP />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route
           path="/onboarding"
@@ -81,6 +86,7 @@ function App() {
           <Route path="applicants" element={<Applicants />} />
           <Route path="profile" element={<RecruiterProfile />} />
           <Route path="settings" element={<RecruiterSettings />} />
+          <Route path="jobs/:id" element={<RecruiterJobDetail />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/signin" replace />} />

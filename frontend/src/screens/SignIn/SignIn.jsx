@@ -5,35 +5,57 @@ import { images } from '../../assets'
 import { useAuth } from '../../context/AuthContext'
 import './SignIn.css'
 
+function EyeOpen() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+function EyeOff() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  )
+}
+
 function SignIn() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  })
+  const [formData, setFormData] = useState({ email: '', password: '' })
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const { signIn } = useAuth()
   const navigate = useNavigate()
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }))
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-
-    const role =
-      localStorage.getItem('recruiter-guide-last-role') || 'applicant'
-
-    signIn({ email: formData.email, role })
-
-    navigate(
-      role === 'recruiter'
-        ? '/recruiter/dashboard'
-        : '/applicant/jobs'
-    )
+    setError('')
+    setLoading(true)
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Sign in failed')
+      localStorage.setItem('recruiter-guide-last-role', data.role)
+      signIn(data)
+      navigate(data.role === 'recruiter' ? '/recruiter/dashboard' : '/applicant/jobs')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -79,16 +101,21 @@ function SignIn() {
           </span>
           <input
             name="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
             required
           />
+          <button type="button" className="eye-toggle" onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? <EyeOpen /> : <EyeOff />}
+          </button>
         </div>
 
-        <button type="submit" className="btn-auth-primary">
-          Sign In
+        {error && <p className="form-error">{error}</p>}
+
+        <button type="submit" className="btn-auth-primary" disabled={loading}>
+          {loading ? 'Signing in…' : 'Sign In'}
         </button>
       </form>
 
@@ -97,7 +124,6 @@ function SignIn() {
         <Link to="/forgot-password" className="link-muted">
           Forgot password?
         </Link>
-
         <Link to="/signup" className="link-highlight">
           Create account
         </Link>

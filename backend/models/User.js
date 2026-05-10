@@ -3,7 +3,11 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = mongoose.Schema(
   {
-    name: {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
       type: String,
       required: true,
     },
@@ -28,6 +32,31 @@ const userSchema = mongoose.Schema(
     location: {
       type: String,
     },
+    experience: {
+      type: String,
+    },
+    companyName: {
+      type: String,
+    },
+    companySize: {
+      type: String,
+    },
+    industry: {
+      type: String,
+    },
+    savedJobs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Job',
+      },
+    ],
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    refreshToken: {
+      type: String,
+    },
   },
   {
     timestamps: true,
@@ -50,6 +79,7 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.toJSON = function () {
   const userObject = this.toObject();
   delete userObject.password;
+  userObject.name = `${this.firstName} ${this.lastName}`;
   return userObject;
 };
 

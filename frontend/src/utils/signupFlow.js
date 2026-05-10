@@ -33,6 +33,10 @@ export function setProfile(data) {
   localStorage.setItem(PROFILE, JSON.stringify(data))
 }
 
+export function clearProfile() {
+  localStorage.removeItem(PROFILE)
+}
+
 const META = 'recruiter-guide-signup-meta'
 
 export function setSignupMeta(data) {

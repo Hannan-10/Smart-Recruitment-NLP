@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { FiEdit, FiLock, FiLogOut, FiTrash2, FiUser, FiBriefcase, FiStar } from 'react-icons/fi'
-import { getProfile, setProfile } from '../../utils/signupFlow'
+import { FiEdit, FiLock, FiLogOut, FiTrash2, FiUser, FiBriefcase, FiStar, FiMapPin, FiEye, FiEyeOff } from 'react-icons/fi'
+import { getProfile, setProfile, clearProfile } from '../../utils/signupFlow'
 import './ApplicantSettings.css'
 
 const settingsOptions = [
@@ -30,42 +30,47 @@ const settingsOptions = [
   {
     key: 'delete-account',
     title: 'Delete account',
-    description: 'Permanently remove your local demo data.',
+    description: 'Permanently remove your account and all associated data.',
     actionLabel: 'Delete account',
     icon: FiTrash2,
     warning: 'This action cannot be undone.',
   },
 ]
 
-const getSkillList = (value) => {
-  if (Array.isArray(value)) return value.filter(Boolean)
-  if (typeof value === 'string') {
-    return value
-      .split(',')
-      .map((skill) => skill.trim())
-      .filter(Boolean)
-  }
-  return []
-}
-
 function ApplicantSettings() {
-  const { signOut } = useAuth()
+  const { signOut, getAccessToken } = useAuth()
   const navigate = useNavigate()
   const profileData = getProfile() || {}
+
   const [activeKey, setActiveKey] = useState('edit-profile')
-  const [statusMessage, setStatusMessage] = useState('')
-  const [deleteConfirm, setDeleteConfirm] = useState('')
+  const [statusMessage, setStatusMessage] = useState({ text: '', type: '' })
+  const [loading, setLoading] = useState(false)
+
   const [profileForm, setProfileForm] = useState({
     firstName: profileData.firstName || '',
     lastName: profileData.lastName || '',
+    bio: profileData.bio || '',
     experience: profileData.experience || '',
-    skills: getSkillList(profileData.skills),
+    location: profileData.location || '',
+    skills: Array.isArray(profileData.skills) ? profileData.skills : [],
   })
   const [newSkill, setNewSkill] = useState('')
 
-  const handleProfileChange = (event) => {
-    const { name, value } = event.target
-    setProfileForm((prev) => ({ ...prev, [name]: value }))
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  })
+  const [showPwd, setShowPwd] = useState({ current: false, new: false, confirm: false })
+
+  const [deletePassword, setDeletePassword] = useState('')
+  const [showDeletePwd, setShowDeletePwd] = useState(false)
+
+  const setStatus = (text, type = 'success') => setStatusMessage({ text, type })
+  const clearStatus = () => setStatusMessage({ text: '', type: '' })
+
+  const handleProfileChange = (e) => {
+    setProfileForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   const addSkill = () => {
@@ -76,120 +81,126 @@ function ApplicantSettings() {
     }
   }
 
-  const removeSkill = (skillToRemove) => {
-    setProfileForm((prev) => ({ ...prev, skills: prev.skills.filter(skill => skill !== skillToRemove) }))
+  const removeSkill = (s) => {
+    setProfileForm((prev) => ({ ...prev, skills: prev.skills.filter((x) => x !== s) }))
   }
 
-  const handleSkillKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault()
-      addSkill()
-    }
+  const handlePasswordChange = (e) => {
+    setPasswordForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  const handlePasswordChange = (event) => {
-    const { name, value } = event.target
-    setPasswordForm((prev) => ({ ...prev, [name]: value }))
-  }
+  const activeOption = settingsOptions.find((o) => o.key === activeKey)
 
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  })
-
-  const activeOption = settingsOptions.find((option) => option.key === activeKey)
-
-  const handlePrimaryAction = () => {
+  const handlePrimaryAction = async () => {
     if (!activeOption) return
+    clearStatus()
+    setLoading(true)
 
-    if (activeOption.key === 'edit-profile') {
-      setProfile({
-        ...profileData,
-        ...profileForm,
-      })
-      setStatusMessage('Profile updated successfully.')
-      return
-    }
-
-    if (activeOption.key === 'reset-password') {
-      if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-        setStatusMessage('Please fill in all password fields.')
+    try {
+      if (activeKey === 'edit-profile') {
+        const res = await fetch('http://localhost:5000/api/onboarding/applicant', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getAccessToken()}`,
+          },
+          body: JSON.stringify(profileForm),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.message || 'Update failed')
+        setProfile({ ...profileData, ...profileForm })
+        setStatus('Profile updated successfully.')
         return
       }
-      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-        setStatusMessage('New password and confirmation must match.')
+
+      if (activeKey === 'reset-password') {
+        if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+          setStatus('Please fill in all password fields.', 'error')
+          return
+        }
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+          setStatus('New password and confirmation must match.', 'error')
+          return
+        }
+        const res = await fetch('http://localhost:5000/api/auth/change-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getAccessToken()}`,
+          },
+          body: JSON.stringify(passwordForm),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.message || 'Password update failed')
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+        setStatus('Password updated successfully.')
         return
       }
-      setStatusMessage('Password updated successfully.')
-      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
-      return
-    }
 
-    if (activeOption.key === 'logout') {
-      signOut()
-      navigate('/signin')
-      return
-    }
-
-    if (activeOption.key === 'delete-account') {
-      if (deleteConfirm.trim().toLowerCase() !== 'delete') {
-        setStatusMessage('Type DELETE into the confirmation field to unlock this action.')
+      if (activeKey === 'logout') {
+        signOut()
+        navigate('/signin')
         return
       }
-      localStorage.clear()
-      signOut()
-      navigate('/signin')
+
+      if (activeKey === 'delete-account') {
+        if (!deletePassword) {
+          setStatus('Enter your password to confirm deletion.', 'error')
+          return
+        }
+        const res = await fetch('http://localhost:5000/api/auth/account', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getAccessToken()}`,
+          },
+          body: JSON.stringify({ password: deletePassword }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.message || 'Deletion failed')
+        clearProfile()
+        signOut()
+        navigate('/signin')
+        return
+      }
+    } catch (err) {
+      setStatus(err.message, 'error')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const renderActiveContent = () => {
+  const renderContent = () => {
     if (activeKey === 'edit-profile') {
       return (
         <div className="settings-form">
           <div className="settings-field-row">
-            <label>
+            <label className="settings-field">
               <span className="field-label"><FiUser /> First name</span>
-              <input
-                name="firstName"
-                value={profileForm.firstName}
-                onChange={handleProfileChange}
-                className="settings-input"
-                placeholder="First name"
-              />
+              <input name="firstName" value={profileForm.firstName} onChange={handleProfileChange} className="settings-input" placeholder="First name" />
             </label>
-            <label>
+            <label className="settings-field">
               <span className="field-label"><FiUser /> Last name</span>
-              <input
-                name="lastName"
-                value={profileForm.lastName}
-                onChange={handleProfileChange}
-                className="settings-input"
-                placeholder="Last name"
-              />
+              <input name="lastName" value={profileForm.lastName} onChange={handleProfileChange} className="settings-input" placeholder="Last name" />
             </label>
           </div>
           <label className="settings-field">
-            <span className="field-label"><FiBriefcase /> Experience</span>
-            <textarea
-              name="experience"
-              rows={3}
-              value={profileForm.experience}
-              onChange={handleProfileChange}
-              className="settings-textarea"
-              placeholder="Describe your experience"
-            />
+            <span className="field-label"><FiMapPin /> Location</span>
+            <input name="location" value={profileForm.location} onChange={handleProfileChange} className="settings-input" placeholder="e.g. New York, USA" />
           </label>
           <label className="settings-field">
+            <span className="field-label"><FiUser /> Bio</span>
+            <textarea name="bio" rows={3} value={profileForm.bio} onChange={handleProfileChange} className="settings-textarea" placeholder="Write a short professional bio…" />
+          </label>
+          <label className="settings-field">
+            <span className="field-label"><FiBriefcase /> Experience</span>
+            <textarea name="experience" rows={3} value={profileForm.experience} onChange={handleProfileChange} className="settings-textarea" placeholder="Describe your experience" />
+          </label>
+          <div className="settings-field">
             <span className="field-label"><FiStar /> Skills</span>
             <div className="skills-container">
               {profileForm.skills.map((skill) => (
-                <button
-                  key={skill}
-                  type="button"
-                  className="skill-tag"
-                  onClick={() => removeSkill(skill)}
-                >
+                <button key={skill} type="button" className="skill-tag" onClick={() => removeSkill(skill)}>
                   {skill} <span className="skill-remove">×</span>
                 </button>
               ))}
@@ -197,12 +208,12 @@ function ApplicantSettings() {
                 type="text"
                 value={newSkill}
                 onChange={(e) => setNewSkill(e.target.value)}
-                onKeyPress={handleSkillKeyPress}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill() } }}
                 className="skill-input"
-                placeholder="Add a skill..."
+                placeholder="Type skill & press Enter…"
               />
             </div>
-          </label>
+          </div>
         </div>
       )
     }
@@ -210,48 +221,29 @@ function ApplicantSettings() {
     if (activeKey === 'reset-password') {
       return (
         <div className="settings-form">
-          <div className="settings-field">
-            <label>Current password</label>
-            <div className="settings-field-input-wrapper">
-              <FiLock />
-              <input
-                type="password"
-                name="currentPassword"
-                value={passwordForm.currentPassword}
-                onChange={handlePasswordChange}
-                className="settings-input"
-                placeholder="Enter current password"
-              />
-            </div>
-          </div>
-          <div className="settings-field">
-            <label>New password</label>
-            <div className="settings-field-input-wrapper">
-              <FiLock />
-              <input
-                type="password"
-                name="newPassword"
-                value={passwordForm.newPassword}
-                onChange={handlePasswordChange}
-                className="settings-input"
-                placeholder="Enter new password"
-              />
-            </div>
-          </div>
-          <div className="settings-field">
-            <label>Confirm new password</label>
-            <div className="settings-field-input-wrapper">
-              <FiLock />
-              <input
-                type="password"
-                name="confirmPassword"
-                value={passwordForm.confirmPassword}
-                onChange={handlePasswordChange}
-                className="settings-input"
-                placeholder="Confirm new password"
-              />
-            </div>
-          </div>
+          {['currentPassword', 'newPassword', 'confirmPassword'].map((field) => {
+            const labels = { currentPassword: 'Current password', newPassword: 'New password', confirmPassword: 'Confirm new password' }
+            const keys = { currentPassword: 'current', newPassword: 'new', confirmPassword: 'confirm' }
+            const k = keys[field]
+            return (
+              <div key={field} className="settings-field">
+                <span className="field-label"><FiLock /> {labels[field]}</span>
+                <div className="pwd-input-wrap">
+                  <input
+                    type={showPwd[k] ? 'text' : 'password'}
+                    name={field}
+                    value={passwordForm[field]}
+                    onChange={handlePasswordChange}
+                    className="settings-input"
+                    placeholder={labels[field]}
+                  />
+                  <button type="button" className="pwd-toggle" onClick={() => setShowPwd((p) => ({ ...p, [k]: !p[k] }))}>
+                    {showPwd[k] ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )
     }
@@ -260,7 +252,7 @@ function ApplicantSettings() {
       return (
         <div className="settings-form">
           <p className="panel-copy">
-            Logging out will end your current session and return you to the sign-in screen. Your data remains stored locally.
+            Logging out will end your current session and return you to the sign-in screen.
           </p>
         </div>
       )
@@ -270,18 +262,23 @@ function ApplicantSettings() {
       return (
         <div className="settings-form">
           <p className="panel-copy">
-            This will permanently erase your local profile data and sign you out. Please type <strong>DELETE</strong> to confirm.
+            This will permanently delete your account and all associated data. Enter your password to confirm.
           </p>
-          <label className="settings-field">
-            Confirm delete
-            <input
-              name="deleteConfirm"
-              value={deleteConfirm}
-              onChange={(event) => setDeleteConfirm(event.target.value)}
-              className="settings-input"
-              placeholder="Type DELETE to confirm"
-            />
-          </label>
+          <div className="settings-field">
+            <span className="field-label"><FiLock /> Confirm with password</span>
+            <div className="pwd-input-wrap">
+              <input
+                type={showDeletePwd ? 'text' : 'password'}
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                className="settings-input"
+                placeholder="Enter your password"
+              />
+              <button type="button" className="pwd-toggle" onClick={() => setShowDeletePwd((p) => !p)}>
+                {showDeletePwd ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
+          </div>
         </div>
       )
     }
@@ -303,14 +300,9 @@ function ApplicantSettings() {
                     type="button"
                     key={option.key}
                     className={`settings-option ${activeKey === option.key ? 'active' : ''}`}
-                    onClick={() => {
-                      setActiveKey(option.key)
-                      setStatusMessage('')
-                    }}
+                    onClick={() => { setActiveKey(option.key); clearStatus() }}
                   >
-                    <span className="settings-option-icon">
-                      <Icon />
-                    </span>
+                    <span className="settings-option-icon"><Icon /></span>
                     <span className="settings-option-copy">
                       <strong>{option.title}</strong>
                       <span>{option.description}</span>
@@ -335,11 +327,20 @@ function ApplicantSettings() {
                 <p>{activeOption.warning}</p>
               </div>
             )}
-            {renderActiveContent()}
-            <button type="button" className="panel-action-btn" onClick={handlePrimaryAction}>
-              {activeOption?.actionLabel}
-            </button>
-            {statusMessage && <p className="settings-status">{statusMessage}</p>}
+            {renderContent()}
+            <div className="panel-footer">
+              <button
+                type="button"
+                className={`panel-action-btn${activeKey === 'delete-account' ? ' danger' : ''}`}
+                onClick={handlePrimaryAction}
+                disabled={loading}
+              >
+                {loading ? 'Please wait…' : activeOption?.actionLabel}
+              </button>
+              {statusMessage.text && (
+                <p className={`settings-status ${statusMessage.type}`}>{statusMessage.text}</p>
+              )}
+            </div>
           </div>
         </section>
       </div>

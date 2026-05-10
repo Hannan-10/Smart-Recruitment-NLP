@@ -1,0 +1,7 @@
+{
+  "watch": ["server.js", "routes", "controllers", "models", "middleware", "config"],
+  "delay": 1000,
+  "ignore": ["node_modules", ".git", "*.test.js"],
+  "ext": "js",
+  "restartable": "rs"
+}

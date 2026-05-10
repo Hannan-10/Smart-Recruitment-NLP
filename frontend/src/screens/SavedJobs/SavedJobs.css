@@ -5,6 +5,12 @@
   color: #0f172a;
 }
 
+.saved-loading {
+  color: #64748b;
+  font-size: 15px;
+  padding: 32px 0;
+}
+
 .saved-page .page-intro {
   margin: 0 0 28px;
   color: #475569;
