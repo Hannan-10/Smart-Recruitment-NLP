@@ -3,7 +3,17 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { FiEdit, FiLock, FiLogOut, FiTrash2, FiUser, FiBriefcase, FiStar, FiMapPin, FiEye, FiEyeOff } from 'react-icons/fi'
 import { getProfile, setProfile, clearProfile } from '../../utils/signupFlow'
+import LocationPicker from '../../components/LocationPicker'
 import './ApplicantSettings.css'
+
+const EXPERIENCE_OPTIONS = [
+  '0-1 years',
+  '1-3 years',
+  '3-5 years',
+  '5-7 years',
+  '7-10 years',
+  '10+ years',
+]
 
 const settingsOptions = [
   {
@@ -184,18 +194,32 @@ function ApplicantSettings() {
               <input name="lastName" value={profileForm.lastName} onChange={handleProfileChange} className="settings-input" placeholder="Last name" />
             </label>
           </div>
-          <label className="settings-field">
+          <div className="settings-field">
             <span className="field-label"><FiMapPin /> Location</span>
-            <input name="location" value={profileForm.location} onChange={handleProfileChange} className="settings-input" placeholder="e.g. New York, USA" />
-          </label>
+            <LocationPicker
+              value={profileForm.location}
+              onChange={(val) => setProfileForm((prev) => ({ ...prev, location: val }))}
+            />
+          </div>
           <label className="settings-field">
             <span className="field-label"><FiUser /> Bio</span>
             <textarea name="bio" rows={3} value={profileForm.bio} onChange={handleProfileChange} className="settings-textarea" placeholder="Write a short professional bio…" />
           </label>
-          <label className="settings-field">
+          <div className="settings-field">
             <span className="field-label"><FiBriefcase /> Experience</span>
-            <textarea name="experience" rows={3} value={profileForm.experience} onChange={handleProfileChange} className="settings-textarea" placeholder="Describe your experience" />
-          </label>
+            <div className="exp-pill-grid">
+              {EXPERIENCE_OPTIONS.map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`exp-pill${profileForm.experience === opt ? ' active' : ''}`}
+                  onClick={() => setProfileForm((prev) => ({ ...prev, experience: opt }))}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="settings-field">
             <span className="field-label"><FiStar /> Skills</span>
             <div className="skills-container">

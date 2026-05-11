@@ -339,6 +339,37 @@
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
+/* EXPERIENCE PILLS */
+.exp-pill-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.exp-pill {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.exp-pill:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.exp-pill.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
 /* RESPONSIVE */
 @media (max-width: 900px) {
   .profile-page { padding: 20px; }

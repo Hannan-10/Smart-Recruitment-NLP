@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../../components/AuthLayout'
+import LocationPicker from '../../components/LocationPicker'
 import { images } from '../../assets'
 import { useAuth } from '../../context/AuthContext'
 import {
@@ -352,25 +353,17 @@ function Onboarding() {
               {isRecruiter ? (
                 <>
                   <label className="label">Company Location</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. New York, USA"
+                  <LocationPicker
                     value={form.location}
-                    onChange={(e) =>
-                      setForm((p) => ({ ...p, location: e.target.value }))
-                    }
+                    onChange={(val) => setForm((p) => ({ ...p, location: val }))}
                   />
                 </>
               ) : (
                 <>
                   <label className="label">Location</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. New York, USA"
+                  <LocationPicker
                     value={form.location}
-                    onChange={(e) =>
-                      setForm((p) => ({ ...p, location: e.target.value }))
-                    }
+                    onChange={(val) => setForm((p) => ({ ...p, location: val }))}
                   />
                 </>
               )}

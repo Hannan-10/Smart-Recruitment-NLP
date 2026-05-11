@@ -26,6 +26,17 @@
   border-radius: 20px;
   object-fit: cover;
   background: #eef2ff;
+  flex-shrink: 0;
+}
+
+.company-logo--initials {
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .job-title {

@@ -106,6 +106,28 @@ const applyJob = asyncHandler(async (req, res) => {
   res.json({ message: 'Application submitted' });
 });
 
+const unapplyJob = asyncHandler(async (req, res) => {
+  const job = await Job.findById(req.params.id);
+
+  if (!job) {
+    res.status(404);
+    throw new Error('Job not found');
+  }
+
+  job.applicants = job.applicants.filter(
+    (id) => id.toString() !== req.user._id.toString()
+  );
+  await job.save();
+  res.json({ message: 'Application withdrawn' });
+});
+
+const getAppliedJobs = asyncHandler(async (req, res) => {
+  const jobs = await Job.find({ applicants: req.user._id })
+    .populate('postedBy', 'name email companyName')
+    .sort({ createdAt: -1 });
+  res.json(jobs);
+});
+
 const toggleSaveJob = asyncHandler(async (req, res) => {
   const jobId = req.params.id;
   const userId = req.user._id;
@@ -146,6 +168,8 @@ module.exports = {
   updateJob,
   deleteJob,
   applyJob,
+  unapplyJob,
+  getAppliedJobs,
   toggleSaveJob,
   getSavedJobs,
 };

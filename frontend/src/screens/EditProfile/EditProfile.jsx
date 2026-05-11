@@ -1,10 +1,20 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../../components/AuthLayout'
+import LocationPicker from '../../components/LocationPicker'
 import { images } from '../../assets'
 import { useAuth } from '../../context/AuthContext'
 import { getProfile, setProfile } from '../../utils/signupFlow'
 import './EditProfile.css'
+
+const EXPERIENCE_OPTIONS = [
+  '0-1 years',
+  '1-3 years',
+  '3-5 years',
+  '5-7 years',
+  '7-10 years',
+  '10+ years',
+]
 
 function EditProfile() {
   const { currentUser } = useAuth()
@@ -16,6 +26,7 @@ function EditProfile() {
     bio: existing.bio || '',
     experience: existing.experience || '',
     skills: existing.skills || '',
+    location: existing.location || '',
   })
 
   const handleChange = (e) => {
@@ -60,14 +71,33 @@ function EditProfile() {
           />
         </div>
         <textarea name="bio" rows={3} placeholder="Bio" value={form.bio} onChange={handleChange} />
-        <textarea
-          name="experience"
-          rows={4}
-          placeholder="Experience"
-          value={form.experience}
-          onChange={handleChange}
-        />
+
+        <div className="field-group">
+          <label className="field-label">Experience Level</label>
+          <div className="exp-pill-grid">
+            {EXPERIENCE_OPTIONS.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                className={`exp-pill${form.experience === opt ? ' active' : ''}`}
+                onClick={() => setForm((prev) => ({ ...prev, experience: opt }))}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <textarea name="skills" rows={3} placeholder="Skills" value={form.skills} onChange={handleChange} />
+
+        <div className="field-group">
+          <label className="field-label">Location</label>
+          <LocationPicker
+            value={form.location}
+            onChange={(val) => setForm((prev) => ({ ...prev, location: val }))}
+          />
+        </div>
+
         <div className="edit-actions">
           <button type="submit" className="btn-auth-primary">
             Save changes

@@ -2,7 +2,17 @@ import { useState, useEffect, useCallback } from 'react'
 import { FiUser, FiBriefcase, FiStar, FiEdit, FiSave, FiCamera, FiMapPin } from 'react-icons/fi'
 import { useAuth } from '../../context/AuthContext'
 import { getProfile, setProfile } from '../../utils/signupFlow'
+import LocationPicker from '../../components/LocationPicker'
 import './ApplicantProfile.css'
+
+const EXPERIENCE_OPTIONS = [
+  '0-1 years',
+  '1-3 years',
+  '3-5 years',
+  '5-7 years',
+  '7-10 years',
+  '10+ years',
+]
 
 function ApplicantProfile() {
   const { getAccessToken } = useAuth()
@@ -217,7 +227,10 @@ function ApplicantProfile() {
         <section className="info-card">
           <h2><FiMapPin /> Location</h2>
           {editMode ? (
-            <input name="location" placeholder="e.g. New York, USA" value={form.location} onChange={handleChange} className="edit-input edit-input--full" />
+            <LocationPicker
+              value={form.location}
+              onChange={(val) => setForm((prev) => ({ ...prev, location: val }))}
+            />
           ) : (
             <p>{profileData.location || 'No location added.'}</p>
           )}
@@ -226,7 +239,18 @@ function ApplicantProfile() {
         <section className="info-card info-card--wide">
           <h2><FiBriefcase /> Experience</h2>
           {editMode ? (
-            <textarea name="experience" rows={4} placeholder="Describe your experience…" value={form.experience} onChange={handleChange} className="edit-textarea" />
+            <div className="exp-pill-grid">
+              {EXPERIENCE_OPTIONS.map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`exp-pill${form.experience === opt ? ' active' : ''}`}
+                  onClick={() => setForm((prev) => ({ ...prev, experience: opt }))}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
           ) : (
             <p>{profileData.experience || 'No experience added.'}</p>
           )}
