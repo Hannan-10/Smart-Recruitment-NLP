@@ -2,7 +2,21 @@ import { useState, useEffect, useCallback } from 'react'
 import { FiUser, FiBriefcase, FiEdit, FiSave, FiCamera, FiMapPin, FiUsers } from 'react-icons/fi'
 import { useAuth } from '../../context/AuthContext'
 import { getProfile, setProfile } from '../../utils/signupFlow'
+import LocationPicker from '../../components/LocationPicker'
 import '../ApplicantProfile/ApplicantProfile.css'
+
+const COMPANY_SIZE_OPTIONS = ['1-10', '11-50', '51-300', '301-1000', '1000-5000', '5000+']
+
+const INDUSTRY_OPTIONS = [
+  'IT & Software',
+  'Healthcare',
+  'Finance',
+  'Education',
+  'Marketing',
+  'Manufacturing',
+  'Retail',
+  'Other',
+]
 
 function RecruiterProfile() {
   const { getAccessToken } = useAuth()
@@ -199,7 +213,10 @@ function RecruiterProfile() {
         <section className="info-card">
           <h2><FiMapPin /> Location</h2>
           {editMode ? (
-            <input name="location" placeholder="e.g. New York, USA" value={form.location} onChange={handleChange} className="edit-input edit-input--full" />
+            <LocationPicker
+              value={form.location}
+              onChange={(val) => setForm((prev) => ({ ...prev, location: val }))}
+            />
           ) : (
             <p>{profileData.location || 'No location added.'}</p>
           )}
@@ -208,7 +225,18 @@ function RecruiterProfile() {
         <section className="info-card">
           <h2><FiUsers /> Company Size</h2>
           {editMode ? (
-            <input name="companySize" placeholder="e.g. 11-50" value={form.companySize} onChange={handleChange} className="edit-input edit-input--full" />
+            <div className="exp-pill-grid">
+              {COMPANY_SIZE_OPTIONS.map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`exp-pill${form.companySize === opt ? ' active' : ''}`}
+                  onClick={() => setForm((prev) => ({ ...prev, companySize: opt }))}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
           ) : (
             <p>{profileData.companySize || 'Not specified.'}</p>
           )}
@@ -217,7 +245,16 @@ function RecruiterProfile() {
         <section className="info-card">
           <h2><FiUser /> Industry</h2>
           {editMode ? (
-            <input name="industry" placeholder="e.g. IT & Software" value={form.industry} onChange={handleChange} className="edit-input edit-input--full" />
+            <select
+              className="edit-input edit-input--full"
+              value={form.industry}
+              onChange={(e) => setForm((prev) => ({ ...prev, industry: e.target.value }))}
+            >
+              <option value="">Select industry</option>
+              {INDUSTRY_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
           ) : (
             <p>{profileData.industry || 'Not specified.'}</p>
           )}

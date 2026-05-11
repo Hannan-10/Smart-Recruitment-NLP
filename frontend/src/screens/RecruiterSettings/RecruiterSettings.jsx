@@ -3,7 +3,21 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { FiEdit, FiLock, FiLogOut, FiTrash2, FiUser, FiBriefcase, FiUsers, FiMapPin, FiEye, FiEyeOff } from 'react-icons/fi'
 import { getProfile, setProfile, clearProfile } from '../../utils/signupFlow'
+import LocationPicker from '../../components/LocationPicker'
 import '../ApplicantSettings/ApplicantSettings.css'
+
+const COMPANY_SIZE_OPTIONS = ['1-10', '11-50', '51-300', '301-1000', '1000-5000', '5000+']
+
+const INDUSTRY_OPTIONS = [
+  'IT & Software',
+  'Healthcare',
+  'Finance',
+  'Education',
+  'Marketing',
+  'Manufacturing',
+  'Retail',
+  'Other',
+]
 
 const settingsOptions = [
   {
@@ -175,20 +189,41 @@ function RecruiterSettings() {
             <span className="field-label"><FiBriefcase /> Company name</span>
             <input name="companyName" value={profileForm.companyName} onChange={handleProfileChange} className="settings-input" placeholder="e.g. Tech Corp" />
           </label>
-          <div className="settings-field-row">
-            <label className="settings-field">
-              <span className="field-label"><FiUsers /> Company size</span>
-              <input name="companySize" value={profileForm.companySize} onChange={handleProfileChange} className="settings-input" placeholder="e.g. 11-50" />
-            </label>
-            <label className="settings-field">
-              <span className="field-label"><FiBriefcase /> Industry</span>
-              <input name="industry" value={profileForm.industry} onChange={handleProfileChange} className="settings-input" placeholder="e.g. IT & Software" />
-            </label>
+          <div className="settings-field">
+            <span className="field-label"><FiUsers /> Company size</span>
+            <div className="exp-pill-grid">
+              {COMPANY_SIZE_OPTIONS.map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`exp-pill${profileForm.companySize === opt ? ' active' : ''}`}
+                  onClick={() => setProfileForm((prev) => ({ ...prev, companySize: opt }))}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
           </div>
-          <label className="settings-field">
+          <div className="settings-field">
+            <span className="field-label"><FiBriefcase /> Industry</span>
+            <select
+              className="settings-input"
+              value={profileForm.industry}
+              onChange={(e) => setProfileForm((prev) => ({ ...prev, industry: e.target.value }))}
+            >
+              <option value="">Select industry</option>
+              {INDUSTRY_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+          <div className="settings-field">
             <span className="field-label"><FiMapPin /> Location</span>
-            <input name="location" value={profileForm.location} onChange={handleProfileChange} className="settings-input" placeholder="e.g. New York, USA" />
-          </label>
+            <LocationPicker
+              value={profileForm.location}
+              onChange={(val) => setProfileForm((prev) => ({ ...prev, location: val }))}
+            />
+          </div>
         </div>
       )
     }
