@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { getProfile } from '../../utils/signupFlow'
+import LocationPicker from '../../components/LocationPicker'
 import { FiBriefcase, FiMapPin, FiFileText, FiDollarSign, FiCheck, FiList } from 'react-icons/fi'
 import './PostJob.css'
 
@@ -14,8 +15,30 @@ const JOB_TYPES = [
 ]
 
 const CATEGORIES = [
-  'Technology', 'Design', 'Marketing', 'Finance',
-  'Operations', 'Healthcare', 'Education', 'Sales', 'Other',
+  'Accountant',
+  'Advocate',
+  'Agriculture',
+  'Apparel',
+  'Arts',
+  'Automobile',
+  'Aviation',
+  'Banking',
+  'BPO',
+  'Business Development',
+  'Chef',
+  'Construction',
+  'Consultant',
+  'Designer',
+  'Digital Media',
+  'Engineering',
+  'Finance',
+  'Fitness',
+  'Healthcare',
+  'HR',
+  'Information Technology',
+  'Public Relations',
+  'Sales',
+  'Teacher',
 ]
 
 function PostJob() {
@@ -121,7 +144,10 @@ function PostJob() {
             </div>
             <div className="form-group">
               <label className="form-label"><FiMapPin /> Location</label>
-              <input name="location" value={form.location} onChange={handleChange} placeholder="e.g., New York, NY" required />
+              <LocationPicker
+                value={form.location}
+                onChange={(val) => setForm((prev) => ({ ...prev, location: val }))}
+              />
             </div>
           </div>
 

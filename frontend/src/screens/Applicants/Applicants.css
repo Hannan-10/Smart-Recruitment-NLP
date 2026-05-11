@@ -450,6 +450,133 @@
   color: #64748b;
 }
 
+/* CV extra info */
+.cv-experience,
+.cv-location {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cv-bio {
+  flex: 1;
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.6;
+  max-width: 380px;
+}
+
+/* CV action buttons row */
+.cv-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-cover-letter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-cover-letter:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.btn-sort-top.sorted {
+  background: #1e293b;
+}
+
+.cv-tag--muted {
+  color: #94a3b8;
+  background: #f8fafc;
+}
+
+/* COVER LETTER MODAL */
+.cl-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+  padding: 24px;
+}
+
+.cl-modal {
+  width: 100%;
+  max-width: 560px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+}
+
+.cl-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.cl-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.cl-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+
+.cl-close:hover {
+  background: #e2e8f0;
+}
+
+.cl-applicant-name {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.cl-body {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #374151;
+  white-space: pre-wrap;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 @media (max-width: 768px) {
   .cv-info-main {
     flex-direction: column;

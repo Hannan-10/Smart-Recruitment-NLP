@@ -1,6 +1,9 @@
+const path = require('path');
+const fs = require('fs');
 const asyncHandler = require('express-async-handler');
 const Job = require('../models/Job');
 const User = require('../models/User');
+const Application = require('../models/Application');
 
 const getJobs = asyncHandler(async (req, res) => {
   const jobs = await Job.find().populate('postedBy', 'name email role');
@@ -92,18 +95,46 @@ const applyJob = asyncHandler(async (req, res) => {
   const job = await Job.findById(req.params.id);
 
   if (!job) {
+    if (req.file) fs.unlinkSync(req.file.path);
     res.status(404);
     throw new Error('Job not found');
   }
 
-  if (job.applicants.includes(req.user._id)) {
+  if (job.applicants.some((id) => id.toString() === req.user._id.toString())) {
+    if (req.file) fs.unlinkSync(req.file.path);
     res.status(400);
     throw new Error('Already applied to this job');
   }
 
+  await Application.create({
+    job: job._id,
+    applicant: req.user._id,
+    cvOriginalName: req.file?.originalname || null,
+    cvPath: req.file?.path || null,
+    coverLetter: req.body.coverLetter || '',
+  });
+
   job.applicants.push(req.user._id);
   await job.save();
   res.json({ message: 'Application submitted' });
+});
+
+const getJobApplicants = asyncHandler(async (req, res) => {
+  const job = await Job.findById(req.params.id);
+  if (!job) {
+    res.status(404);
+    throw new Error('Job not found');
+  }
+  if (job.postedBy.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('Not authorized');
+  }
+
+  const applications = await Application.find({ job: req.params.id })
+    .populate('applicant', 'firstName lastName email skills experience bio location')
+    .sort({ createdAt: -1 });
+
+  res.json(applications);
 });
 
 const unapplyJob = asyncHandler(async (req, res) => {
@@ -118,6 +149,15 @@ const unapplyJob = asyncHandler(async (req, res) => {
     (id) => id.toString() !== req.user._id.toString()
   );
   await job.save();
+
+  const application = await Application.findOneAndDelete({
+    job: req.params.id,
+    applicant: req.user._id,
+  });
+  if (application?.cvPath && fs.existsSync(application.cvPath)) {
+    fs.unlinkSync(application.cvPath);
+  }
+
   res.json({ message: 'Application withdrawn' });
 });
 
@@ -170,6 +210,7 @@ module.exports = {
   applyJob,
   unapplyJob,
   getAppliedJobs,
+  getJobApplicants,
   toggleSaveJob,
   getSavedJobs,
 };

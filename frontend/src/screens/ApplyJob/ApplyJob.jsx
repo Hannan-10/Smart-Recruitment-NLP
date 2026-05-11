@@ -47,9 +47,14 @@ function ApplyJob() {
     try {
       const token = getAccessToken()
       if (token) {
+        const formData = new FormData()
+        formData.append('cv', cvFile)
+        if (coverLetter.trim()) formData.append('coverLetter', coverLetter)
+
         const res = await fetch(`http://localhost:5000/api/jobs/${jobId}/apply`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
+          body: formData,
         })
         if (!res.ok) {
           const data = await res.json()
