@@ -46,7 +46,8 @@
       "Bash(Select-Object -ExpandProperty Name)",
       "Bash(Sort-Object)",
       "Bash(sed -n '7,9p' \"C:/Users/HP/Documents/GitHub/Smart-Recruitment-NLP/frontend/src/screens/RecruiterJobDetail/RecruiterJobDetail.jsx\")",
-      "Bash(sed -n '130,134p' \"C:/Users/HP/Documents/GitHub/Smart-Recruitment-NLP/frontend/src/screens/RecruiterJobDetail/RecruiterJobDetail.jsx\")"
+      "Bash(sed -n '130,134p' \"C:/Users/HP/Documents/GitHub/Smart-Recruitment-NLP/frontend/src/screens/RecruiterJobDetail/RecruiterJobDetail.jsx\")",
+      "Bash(python -c \"from docx import Document; print\\('python-docx OK'\\)\")"
     ],
     "additionalDirectories": [
       "\\tmp"

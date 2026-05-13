@@ -195,9 +195,6 @@ function Applicants() {
                   onChange={(e) => setCvSearch(e.target.value)}
                 />
               </div>
-              <button onClick={handleSortTopCVs} className={`btn-sort-top${sorted ? ' sorted' : ''}`}>
-                <FiArrowUp /> {sorted ? 'Sorted by Skills' : 'Rank by Skills'}
-              </button>
             </div>
           </div>
 

@@ -127,7 +127,7 @@ def build_feature_vector(jd_emb, cv_emb, cv_raw: str, jd_clean: str, cv_clean: s
     return np.concatenate([[cosine, dot, skill, exp], diff, prod])   # 1540
 
 
-# ── PDF text extraction ────────────────────────────────────────────────────────
+# ── Text extraction by format ──────────────────────────────────────────────────
 def extract_pdf_text(path: str) -> str:
     try:
         text = ''
@@ -139,6 +139,48 @@ def extract_pdf_text(path: str) -> str:
         return text.strip()
     except Exception:
         return ''
+
+
+def extract_docx_text(path: str) -> str:
+    try:
+        from docx import Document
+        doc = Document(path)
+        parts = []
+        for para in doc.paragraphs:
+            if para.text.strip():
+                parts.append(para.text)
+        for table in doc.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    if cell.text.strip():
+                        parts.append(cell.text)
+        return '\n'.join(parts).strip()
+    except Exception:
+        return ''
+
+
+def extract_doc_text(path: str) -> str:
+    """Best-effort extraction from legacy binary .doc files."""
+    try:
+        with open(path, 'rb') as f:
+            raw = f.read()
+        text = raw.decode('latin-1', errors='ignore')
+        text = re.sub(r'[^\x20-\x7E\s]', ' ', text)
+        text = re.sub(r'\s+', ' ', text)
+        return text.strip()
+    except Exception:
+        return ''
+
+
+def extract_cv_text(path: str) -> str:
+    ext = os.path.splitext(path)[1].lower()
+    if ext == '.pdf':
+        return extract_pdf_text(path)
+    elif ext == '.docx':
+        return extract_docx_text(path)
+    elif ext == '.doc':
+        return extract_doc_text(path)
+    return ''
 
 
 # ── Flask app ─────────────────────────────────────────────────────────────────
@@ -175,7 +217,7 @@ def score_cvs():
         if not cv_path:
             error_msg = 'No CV uploaded'
         else:
-            cv_raw = extract_pdf_text(cv_path)
+            cv_raw = extract_cv_text(cv_path)
             if not cv_raw:
                 error_msg = 'Could not extract text from CV'
             else:
