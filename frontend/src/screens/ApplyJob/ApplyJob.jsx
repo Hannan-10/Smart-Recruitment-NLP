@@ -88,8 +88,8 @@ function ApplyJob() {
     <main className="dashboard-content apply-job-page">
       <div className="job-details">
         <div className="job-header">
-          {job.logo ? (
-            <img src={job.logo} alt={`${job.company} logo`} className="company-logo" />
+          {job.postedBy?.photo ? (
+            <img src={job.postedBy.photo} alt={`${job.company} logo`} className="company-logo" />
           ) : (
             <div
               className="company-logo company-logo--initials"
@@ -123,14 +123,14 @@ function ApplyJob() {
             <FiUsers />
             <div>
               <span>Employees</span>
-              <strong>{job.employeeSize || '—'}</strong>
+              <strong>{job.postedBy?.companySize || '—'}</strong>
             </div>
           </div>
           <div className="job-meta-item">
             <FiBriefcase />
             <div>
               <span>Industry</span>
-              <strong>{job.industry || job.category || '—'}</strong>
+              <strong>{job.postedBy?.industry || job.category || '—'}</strong>
             </div>
           </div>
         </div>
@@ -142,7 +142,11 @@ function ApplyJob() {
 
         {message ? <div className="success-banner">{message}</div> : null}
 
-        {!message && (
+        {!message && job.appliedAt ? (
+          <div className="applied-badge">
+            ✓ Applied on {new Date(job.appliedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+          </div>
+        ) : !message && (
           <button onClick={() => setShowModal(true)} className="detail-apply-btn" aria-label="Apply now">
             <FiSend />
           </button>

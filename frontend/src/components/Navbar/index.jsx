@@ -46,7 +46,7 @@ function Navbar() {
   return (
     <aside className="sidebar">
       <div className="brand">
-        {logos.MainLogo ? <img src={logos.MainLogo} alt="" className="brand-logo" /> : null}
+        <img src={logos.MainLogo} alt="Recruiter Guide" className="brand-logo" />
         <h2>Recruiter Guide</h2>
       </div>
 

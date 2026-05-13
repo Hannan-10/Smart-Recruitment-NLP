@@ -97,6 +97,12 @@
   font-size: 13px;
 }
 
+@media (max-width: 500px) {
+  .role-selector {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* INPUT GROUP */
 .input-group {
   position: relative;

@@ -1,5 +1,5 @@
 import './JobCard.css'
-import { FiMapPin, FiUsers, FiBookmark, FiSend, FiTag } from 'react-icons/fi'
+import { FiMapPin, FiUsers, FiBookmark, FiSend, FiTag, FiCheckCircle } from 'react-icons/fi'
 
 function logoColor(name = '') {
   const hue = [...name].reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360
@@ -24,6 +24,7 @@ function JobCard({
   onCardClick,
   isSaved,
   actionIcon,
+  applied = false,
 }) {
   const handleButtonClick = (e, cb) => { e.stopPropagation(); cb?.() }
   const ActionIcon = actionIcon
@@ -84,7 +85,12 @@ function JobCard({
               {isSaved ? 'Saved' : 'Save'}
             </button>
           )}
-          {onAction && actionText && (
+          {applied ? (
+            <span className="applied-badge-btn">
+              <FiCheckCircle className="btn-icon" />
+              Applied
+            </span>
+          ) : onAction && actionText && (
             <button onClick={(e) => handleButtonClick(e, onAction)} className="apply-btn">
               {ActionIcon ? <ActionIcon className="btn-icon" /> : <FiSend className="btn-icon" />}
               {actionText}

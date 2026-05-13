@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 
 const updateApplicantProfile = asyncHandler(async (req, res) => {
-  const { bio, experience, skills, location } = req.body;
+  const { bio, experience, skills, location, photo } = req.body;
   const userId = req.user.id;
 
   if (!bio || !experience || !skills || !location) {
@@ -15,16 +15,10 @@ const updateApplicantProfile = asyncHandler(async (req, res) => {
     throw new Error('At least one skill is required');
   }
 
-  const user = await User.findByIdAndUpdate(
-    userId,
-    {
-      bio,
-      skills,
-      location,
-      experience,
-    },
-    { new: true }
-  );
+  const updateData = { bio, skills, location, experience };
+  if (photo !== undefined) updateData.photo = photo;
+
+  const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
 
   if (!user) {
     res.status(404);
@@ -38,7 +32,7 @@ const updateApplicantProfile = asyncHandler(async (req, res) => {
 });
 
 const updateRecruiterProfile = asyncHandler(async (req, res) => {
-  const { companyName, companySize, industry, location } = req.body;
+  const { companyName, companySize, industry, location, photo } = req.body;
   const userId = req.user.id;
 
   if (!companyName || !companySize || !industry || !location) {
@@ -46,16 +40,10 @@ const updateRecruiterProfile = asyncHandler(async (req, res) => {
     throw new Error('All fields are required');
   }
 
-  const user = await User.findByIdAndUpdate(
-    userId,
-    {
-      companyName,
-      companySize,
-      industry,
-      location,
-    },
-    { new: true }
-  );
+  const updateData = { companyName, companySize, industry, location };
+  if (photo !== undefined) updateData.photo = photo;
+
+  const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
 
   if (!user) {
     res.status(404);
@@ -82,7 +70,7 @@ const getProfile = asyncHandler(async (req, res) => {
 });
 
 const editApplicantProfile = asyncHandler(async (req, res) => {
-  const { firstName, lastName, bio, experience, skills, location } = req.body;
+  const { firstName, lastName, bio, experience, skills, location, photo } = req.body;
   const userId = req.user.id;
 
   const updateData = {};
@@ -91,6 +79,7 @@ const editApplicantProfile = asyncHandler(async (req, res) => {
   if (bio !== undefined) updateData.bio = bio;
   if (experience !== undefined) updateData.experience = experience;
   if (location !== undefined) updateData.location = location;
+  if (photo !== undefined) updateData.photo = photo;
   if (skills !== undefined) {
     if (!Array.isArray(skills)) {
       res.status(400);
@@ -110,7 +99,7 @@ const editApplicantProfile = asyncHandler(async (req, res) => {
 });
 
 const editRecruiterProfile = asyncHandler(async (req, res) => {
-  const { firstName, lastName, companyName, companySize, industry, location } = req.body;
+  const { firstName, lastName, companyName, companySize, industry, location, photo } = req.body;
   const userId = req.user.id;
 
   const updateData = {};
@@ -120,6 +109,7 @@ const editRecruiterProfile = asyncHandler(async (req, res) => {
   if (companySize !== undefined) updateData.companySize = companySize;
   if (industry !== undefined) updateData.industry = industry;
   if (location !== undefined) updateData.location = location;
+  if (photo !== undefined) updateData.photo = photo;
 
   const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
 

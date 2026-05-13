@@ -90,3 +90,24 @@
   font-size: 14px;
   color: #e0e7ff;
 }
+
+@media (max-width: 900px) {
+  .job-search {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .visibility-card {
+    padding: 16px;
+  }
+
+  .visibility-card h3 {
+    font-size: 16px;
+  }
+
+  .filter-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}

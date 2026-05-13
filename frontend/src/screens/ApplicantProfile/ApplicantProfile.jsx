@@ -3,6 +3,7 @@ import { FiUser, FiBriefcase, FiStar, FiEdit, FiSave, FiCamera, FiMapPin } from 
 import { useAuth } from '../../context/AuthContext'
 import { getProfile, setProfile } from '../../utils/signupFlow'
 import LocationPicker from '../../components/LocationPicker'
+import Loader from '../../components/Loader'
 import './ApplicantProfile.css'
 
 const EXPERIENCE_OPTIONS = [
@@ -55,7 +56,7 @@ function ApplicantProfile() {
         experience: data.experience || savedProfile.experience || '',
         location: data.location || savedProfile.location || '',
         skills: data.skills?.length ? data.skills : (savedProfile.skills || []),
-        photoPreview: savedProfile.photoPreview || '',
+        photoPreview: data.photo || savedProfile.photoPreview || '',
       }
       setProfileData(merged)
       setForm({
@@ -114,6 +115,7 @@ function ApplicantProfile() {
           experience: form.experience,
           location: form.location,
           skills: form.skills,
+          photo: photoPreview || undefined,
         }),
       })
       const data = await res.json()
@@ -145,7 +147,7 @@ function ApplicantProfile() {
   if (loading) {
     return (
       <main className="dashboard-content profile-page">
-        <p className="profile-loading">Loading profile…</p>
+        <Loader text="Loading profile…" size="lg" />
       </main>
     )
   }

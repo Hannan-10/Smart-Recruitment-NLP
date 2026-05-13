@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import JobCard from '../../components/JobCard'
 import { getProfile } from '../../utils/signupFlow'
 import { FiSearch, FiTrendingUp } from 'react-icons/fi'
+import Loader from '../../components/Loader'
 import './ApplicantJobs.css'
 
 const TYPE_LABELS = {
@@ -24,6 +25,7 @@ function ApplicantJobs() {
 
   const [jobs, setJobs] = useState([])
   const [savedIds, setSavedIds] = useState(new Set())
+  const [appliedMap, setAppliedMap] = useState({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [activeType, setActiveType] = useState('All Roles')
@@ -57,9 +59,24 @@ function ApplicantJobs() {
     } catch {}
   }, [getAccessToken])
 
+  const fetchApplied = useCallback(async () => {
+    const token = getAccessToken()
+    if (!token) return
+    try {
+      const res = await fetch('http://localhost:5000/api/jobs/applied', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      const map = {}
+      data.forEach((j) => { map[j._id] = j.appliedAt })
+      setAppliedMap(map)
+    } catch {}
+  }, [getAccessToken])
+
   useEffect(() => {
-    Promise.all([fetchJobs(), fetchSaved()]).finally(() => setLoading(false))
-  }, [fetchJobs, fetchSaved])
+    Promise.all([fetchJobs(), fetchSaved(), fetchApplied()]).finally(() => setLoading(false))
+  }, [fetchJobs, fetchSaved, fetchApplied])
 
   const handleSave = async (job) => {
     const token = getAccessToken()
@@ -81,7 +98,8 @@ function ApplicantJobs() {
   }
 
   const handleApply = (job) => {
-    navigate('/applicant/apply-job', { state: { job } })
+    const appliedAt = appliedMap[job._id] || null
+    navigate('/applicant/apply-job', { state: { job: { ...job, appliedAt } } })
   }
 
   // Unique categories from fetched jobs (excluding empty)
@@ -157,7 +175,7 @@ function ApplicantJobs() {
             <span>{filteredJobs.length} result{filteredJobs.length !== 1 ? 's' : ''}</span>
           </div>
 
-          {loading && <p style={{ color: '#64748b', paddingTop: 16 }}>Loading jobs…</p>}
+          {loading && <Loader text="Loading jobs…" size="sm" />}
 
           <div className="job-list">
             {!loading && filteredJobs.length === 0 && (
@@ -172,11 +190,13 @@ function ApplicantJobs() {
                 type={job.type}
                 category={job.category}
                 date={new Date(job.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                logo={job.postedBy?.photo}
                 onCardClick={() => handleApply(job)}
                 onSave={() => handleSave(job)}
-                onAction={() => handleApply(job)}
-                actionText="Apply now"
+                onAction={job._id in appliedMap ? undefined : () => handleApply(job)}
+                actionText={job._id in appliedMap ? undefined : 'Apply now'}
                 isSaved={savedIds.has(job._id)}
+                applied={job._id in appliedMap}
               />
             ))}
           </div>

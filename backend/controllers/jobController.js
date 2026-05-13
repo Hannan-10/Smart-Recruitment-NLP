@@ -7,7 +7,7 @@ const User = require('../models/User');
 const Application = require('../models/Application');
 
 const getJobs = asyncHandler(async (req, res) => {
-  const jobs = await Job.find().populate('postedBy', 'name email role');
+  const jobs = await Job.find().populate('postedBy', 'name email role photo companySize industry').sort({ createdAt: -1 });
   res.json(jobs);
 });
 
@@ -17,7 +17,7 @@ const getMyJobs = asyncHandler(async (req, res) => {
 });
 
 const getJobById = asyncHandler(async (req, res) => {
-  const job = await Job.findById(req.params.id).populate('postedBy', 'name email role');
+  const job = await Job.findById(req.params.id).populate('postedBy', 'name email role photo companySize industry');
   if (!job) {
     res.status(404);
     throw new Error('Job not found');
@@ -239,9 +239,27 @@ const unapplyJob = asyncHandler(async (req, res) => {
 
 const getAppliedJobs = asyncHandler(async (req, res) => {
   const jobs = await Job.find({ applicants: req.user._id })
-    .populate('postedBy', 'name email companyName')
+    .populate('postedBy', 'name email companyName photo companySize industry')
     .sort({ createdAt: -1 });
-  res.json(jobs);
+
+  const applications = await Application.find({
+    applicant: req.user._id,
+    job: { $in: jobs.map((j) => j._id) },
+  }).select('job createdAt status');
+
+  const appMap = {};
+  applications.forEach((a) => {
+    appMap[a.job.toString()] = { appliedAt: a.createdAt, status: a.status, applicationId: a._id };
+  });
+
+  const result = jobs.map((j) => ({
+    ...j.toObject(),
+    appliedAt: appMap[j._id.toString()]?.appliedAt || null,
+    applicationStatus: appMap[j._id.toString()]?.status || 'applied',
+    applicationId: appMap[j._id.toString()]?.applicationId || null,
+  }));
+
+  res.json(result);
 });
 
 const toggleSaveJob = asyncHandler(async (req, res) => {
@@ -271,7 +289,7 @@ const toggleSaveJob = asyncHandler(async (req, res) => {
 const getSavedJobs = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate({
     path: 'savedJobs',
-    populate: { path: 'postedBy', select: 'companyName' },
+    populate: { path: 'postedBy', select: 'companyName photo companySize industry' },
   });
   res.json(user.savedJobs);
 });

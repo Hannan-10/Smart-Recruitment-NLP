@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import JobCard from '../../components/JobCard'
 import { getProfile } from '../../utils/signupFlow'
 import { FiSearch, FiTrendingUp } from 'react-icons/fi'
+import Loader from '../../components/Loader'
 import './RecruiterDashboard.css'
 
 const pills = ['All Jobs', 'Full-time', 'Part-time', 'Contract', 'Remote', 'Internship']
@@ -90,7 +91,7 @@ function RecruiterDashboard() {
             <span>{filteredJobs.length} result{filteredJobs.length !== 1 ? 's' : ''}</span>
           </div>
 
-          {loading && <p style={{ color: '#64748b', paddingTop: 16 }}>Loading jobs…</p>}
+          {loading && <Loader text="Loading jobs…" size="sm" />}
           {error && <p style={{ color: '#dc2626', paddingTop: 16 }}>{error}</p>}
 
           <div className="job-list">
@@ -106,6 +107,7 @@ function RecruiterDashboard() {
                 type={job.type}
                 category={job.category}
                 date={new Date(job.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                logo={profile?.photoPreview}
                 onCardClick={() => navigate(`/recruiter/jobs/${job._id}`)}
                 actionText="View Details"
                 onAction={() => navigate(`/recruiter/jobs/${job._id}`)}

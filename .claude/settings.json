@@ -41,7 +41,12 @@
       "Read(//c/Windows/**)",
       "Bash(pip show *)",
       "Bash(pip uninstall *)",
-      "Bash(pip install *)"
+      "Bash(pip install *)",
+      "Bash(Get-ChildItem -Path \"frontend\\\\src\\\\screens\" -Directory)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(Sort-Object)",
+      "Bash(sed -n '7,9p' \"C:/Users/HP/Documents/GitHub/Smart-Recruitment-NLP/frontend/src/screens/RecruiterJobDetail/RecruiterJobDetail.jsx\")",
+      "Bash(sed -n '130,134p' \"C:/Users/HP/Documents/GitHub/Smart-Recruitment-NLP/frontend/src/screens/RecruiterJobDetail/RecruiterJobDetail.jsx\")"
     ],
     "additionalDirectories": [
       "\\tmp"

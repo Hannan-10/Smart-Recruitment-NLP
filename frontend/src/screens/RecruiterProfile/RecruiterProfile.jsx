@@ -3,6 +3,7 @@ import { FiUser, FiBriefcase, FiEdit, FiSave, FiCamera, FiMapPin, FiUsers } from
 import { useAuth } from '../../context/AuthContext'
 import { getProfile, setProfile } from '../../utils/signupFlow'
 import LocationPicker from '../../components/LocationPicker'
+import Loader from '../../components/Loader'
 import '../ApplicantProfile/ApplicantProfile.css'
 
 const COMPANY_SIZE_OPTIONS = ['1-10', '11-50', '51-300', '301-1000', '1000-5000', '5000+']
@@ -58,7 +59,7 @@ function RecruiterProfile() {
         companySize: data.companySize || savedProfile.companySize || '',
         industry: data.industry || savedProfile.industry || '',
         location: data.location || savedProfile.location || '',
-        photoPreview: savedProfile.photoPreview || '',
+        photoPreview: data.photo || savedProfile.photoPreview || '',
       }
       setProfileData(merged)
       setForm({
@@ -98,7 +99,7 @@ function RecruiterProfile() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getAccessToken()}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, photo: photoPreview || undefined }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Update failed')
@@ -129,7 +130,7 @@ function RecruiterProfile() {
   if (loading) {
     return (
       <main className="dashboard-content profile-page">
-        <p className="profile-loading">Loading profile…</p>
+        <Loader text="Loading profile…" size="lg" />
       </main>
     )
   }

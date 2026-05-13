@@ -42,10 +42,20 @@
 @media (max-width: 900px) {
   .page-shell.dashboard-layout {
     flex-direction: column;
-    padding: 16px;
+    padding: 0;
   }
 
   .dashboard-content {
     padding: 20px 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-content {
+    padding: 14px 12px;
+  }
+
+  .dashboard-content h1 {
+    font-size: clamp(20px, 5vw, 26px);
   }
 }

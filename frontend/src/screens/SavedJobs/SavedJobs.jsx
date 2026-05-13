@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import JobCard from '../../components/JobCard'
+import Loader from '../../components/Loader'
 import './SavedJobs.css'
 
 function SavedJobs() {
@@ -48,7 +49,7 @@ function SavedJobs() {
       <h1 className="dash-serif">Saved Jobs</h1>
       <p className="page-intro">Roles you bookmarked for later.</p>
 
-      {loading && <p className="saved-loading">Loading saved jobs…</p>}
+      {loading && <Loader text="Loading saved jobs…" size="sm" />}
 
       <section className="job-list-stack">
         {!loading && savedJobs.length === 0 && (
@@ -63,6 +64,7 @@ function SavedJobs() {
             type={job.type}
             category={job.category}
             date={new Date(job.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+            logo={job.postedBy?.photo}
             onCardClick={() => handleApply(job)}
             onSave={() => handleUnsave(job)}
             onAction={() => handleApply(job)}

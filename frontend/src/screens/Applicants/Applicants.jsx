@@ -4,6 +4,7 @@ import {
   FiBriefcase, FiMapPin, FiUsers, FiArrowUp, FiDownload,
   FiX, FiSearch, FiFileText, FiAlertCircle, FiCpu,
 } from 'react-icons/fi'
+import Loader from '../../components/Loader'
 import './Applicants.css'
 
 function Applicants() {
@@ -102,6 +103,25 @@ function Applicants() {
     }
   }
 
+  const handleStatusChange = async (appId, newStatus) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/applications/${appId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAccessToken()}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      if (!res.ok) throw new Error()
+      setApplications((prev) =>
+        prev.map((a) => a._id === appId ? { ...a, status: newStatus } : a)
+      )
+    } catch {
+      alert('Failed to update status.')
+    }
+  }
+
   const displayedApps = useMemo(() => {
     const q = cvSearch.toLowerCase()
     return applications.filter((app) => {
@@ -120,7 +140,7 @@ function Applicants() {
             <p>Review and manage candidates for your posted positions.</p>
           </div>
 
-          {jobsLoading && <p style={{ color: '#64748b' }}>Loading jobs…</p>}
+          {jobsLoading && <Loader text="Loading jobs…" />}
 
           {!jobsLoading && jobs.length === 0 && (
             <p style={{ color: '#94a3b8' }}>No jobs posted yet.</p>
@@ -183,7 +203,7 @@ function Applicants() {
 
           {/* LIST */}
           <div className="applicants-cvs-list">
-            {appsLoading && <p style={{ color: '#64748b', padding: '40px 0', textAlign: 'center' }}>Loading applicants…</p>}
+            {appsLoading && <Loader text="Loading applicants…" size="lg" />}
 
             {!appsLoading && appsError && (
               <div className="no-results">
@@ -313,6 +333,20 @@ function Applicants() {
                           <FiDownload />
                           {downloadingId === app._id ? 'Downloading…' : 'Download CV'}
                         </button>
+
+                        <select
+                          className={`app-status-select app-status-select--${app.status || 'applied'}`}
+                          value={app.status || 'applied'}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => handleStatusChange(app._id, e.target.value)}
+                          title="Update applicant status"
+                        >
+                          <option value="applied">Applied</option>
+                          <option value="shortlisted">Shortlisted</option>
+                          <option value="interview">Interview</option>
+                          <option value="selected">Selected</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
                       </div>
                     </div>
                   </div>

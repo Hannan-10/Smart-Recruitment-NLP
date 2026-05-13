@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../../components/AuthLayout'
 import LocationPicker from '../../components/LocationPicker'
+import ImageCropper from '../../components/ImageCropper'
 import { images } from '../../assets'
 import { useAuth } from '../../context/AuthContext'
 import {
@@ -67,6 +68,7 @@ function Onboarding() {
 
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [cropSrc, setCropSrc] = useState(null)
 
   useEffect(() => {
     if (!needsOnboarding()) {
@@ -86,10 +88,10 @@ function Onboarding() {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = () => {
-      setForm((p) => ({ ...p, photoPreview: reader.result }))
-    }
+    reader.onload = () => setCropSrc(reader.result)
     reader.readAsDataURL(file)
+    // reset input so re-selecting the same file still fires onChange
+    e.target.value = ''
   }
 
   const addSkill = (e) => {
@@ -141,12 +143,14 @@ function Onboarding() {
             companySize: form.companySize,
             industry: form.industry,
             location: form.location,
+            photo: form.photoPreview || undefined,
           }
         : {
             bio: form.bio,
             experience: form.experience,
             skills: form.skills,
             location: form.location,
+            photo: form.photoPreview || undefined,
           }
 
       const response = await fetch(`http://localhost:5000${endpoint}`, {
@@ -215,17 +219,23 @@ function Onboarding() {
             <div className="fade">
               <label className="label">{isRecruiter ? 'Company Logo' : 'Profile Photo'}</label>
 
-              <label className="photo-drop">
+              <label className="photo-drop photo-drop--circle">
                 {form.photoPreview ? (
-                  <img src={form.photoPreview} />
+                  <img src={form.photoPreview} alt="preview" className="photo-preview-circle" />
                 ) : (
                   <div className="photo-empty">
                     <span>+</span>
                     <p>{isRecruiter ? 'Upload Logo' : 'Upload Photo'}</p>
                   </div>
                 )}
-                <input type="file" onChange={handlePhoto} hidden />
+                <input type="file" accept="image/*" onChange={handlePhoto} hidden />
               </label>
+              {form.photoPreview && (
+                <label className="photo-repick">
+                  Change photo
+                  <input type="file" accept="image/*" onChange={handlePhoto} hidden />
+                </label>
+              )}
 
               {isRecruiter ? (
                 <>
@@ -393,6 +403,16 @@ function Onboarding() {
 
         </form>
       </div>
+      {cropSrc && (
+        <ImageCropper
+          src={cropSrc}
+          onCrop={(dataUrl) => {
+            setForm((p) => ({ ...p, photoPreview: dataUrl }))
+            setCropSrc(null)
+          }}
+          onCancel={() => setCropSrc(null)}
+        />
+      )}
     </AuthLayout>
   )
 }

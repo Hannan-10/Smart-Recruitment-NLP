@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState, useCallback } from 'react'
+import { clearProfile, setNeedOnboarding } from '../utils/signupFlow'
 
 const AuthContext = createContext(null)
 
@@ -13,6 +14,7 @@ export function AuthProvider({ children }) {
   })
 
   const signIn = useCallback((userData) => {
+    clearProfile()
     localStorage.setItem(STORAGE_KEY, JSON.stringify(userData))
     localStorage.setItem(ACCESS_TOKEN_KEY, userData.accessToken)
     localStorage.setItem(REFRESH_TOKEN_KEY, userData.refreshToken)
@@ -23,6 +25,8 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(STORAGE_KEY)
     localStorage.removeItem(ACCESS_TOKEN_KEY)
     localStorage.removeItem(REFRESH_TOKEN_KEY)
+    clearProfile()
+    setNeedOnboarding(false)
     setCurrentUser(null)
   }, [])
 

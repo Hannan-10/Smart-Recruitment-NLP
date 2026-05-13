@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../../components/AuthLayout'
 import { images } from '../../assets'
 import { useAuth } from '../../context/AuthContext'
+import { setProfile } from '../../utils/signupFlow'
 import './SignIn.css'
 
 function EyeOpen() {
@@ -50,6 +51,30 @@ function SignIn() {
       if (!res.ok) throw new Error(data.message || 'Sign in failed')
       localStorage.setItem('recruiter-guide-last-role', data.role)
       signIn(data)
+
+      // Populate sidebar immediately — fetch profile with the fresh token
+      try {
+        const profileRes = await fetch('http://localhost:5000/api/onboarding/profile', {
+          headers: { Authorization: `Bearer ${data.accessToken}` },
+        })
+        if (profileRes.ok) {
+          const profile = await profileRes.json()
+          setProfile({
+            email: profile.email,
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            bio: profile.bio,
+            experience: profile.experience,
+            skills: profile.skills,
+            location: profile.location,
+            companyName: profile.companyName,
+            companySize: profile.companySize,
+            industry: profile.industry,
+            photoPreview: profile.photo || '',
+          })
+        }
+      } catch {}
+
       navigate(data.role === 'recruiter' ? '/recruiter/dashboard' : '/applicant/jobs')
     } catch (err) {
       setError(err.message)

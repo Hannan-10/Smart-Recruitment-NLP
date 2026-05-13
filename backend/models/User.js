@@ -44,6 +44,9 @@ const userSchema = mongoose.Schema(
     industry: {
       type: String,
     },
+    photo: {
+      type: String,
+    },
     savedJobs: [
       {
         type: mongoose.Schema.Types.ObjectId,

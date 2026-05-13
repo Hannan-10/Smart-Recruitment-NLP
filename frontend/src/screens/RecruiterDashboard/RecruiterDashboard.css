@@ -364,3 +364,14 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 600px) {
+  .dashboard-content.applicant-jobs-page,
+  .applicant-jobs-page {
+    padding: 16px;
+  }
+
+  .dash-greeting {
+    font-size: 24px;
+  }
+}

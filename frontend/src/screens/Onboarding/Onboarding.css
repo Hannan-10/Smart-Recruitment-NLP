@@ -53,10 +53,10 @@
   display: block;
 }
 
-/* PHOTO DROP (FIXED FULL EXPERIENCE) */
+/* PHOTO DROP */
 .photo-drop {
   width: 100%;
-  height: 180px;
+  height: 160px;
   border-radius: 16px;
   border: 2px dashed rgba(37, 99, 235, 0.5);
   display: flex;
@@ -73,10 +73,38 @@
   transform: scale(1.01);
 }
 
-.photo-drop img {
+/* Circular variant — shown once a photo is set */
+.photo-drop--circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  margin: 0 auto;
+  border: 3px dashed rgba(37, 99, 235, 0.45);
+}
+
+.photo-preview-circle {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+/* "Change photo" text link below the circle */
+.photo-repick {
+  display: block;
+  text-align: center;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.photo-repick:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
 }
 
 /* EMPTY PHOTO */
@@ -202,6 +230,27 @@ button:hover {
 .error {
   color: #f87171;
   font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .pill-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .btn-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-row button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .pill-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* SELECT */

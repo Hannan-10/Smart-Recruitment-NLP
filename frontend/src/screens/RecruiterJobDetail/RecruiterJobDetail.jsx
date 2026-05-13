@@ -5,6 +5,7 @@ import {
   FiBriefcase, FiMapPin, FiUsers, FiDollarSign, FiFileText,
   FiEdit, FiSave, FiTrash2, FiArrowLeft, FiList, FiCalendar, FiX, FiTag,
 } from 'react-icons/fi'
+import Loader from '../../components/Loader'
 import './RecruiterJobDetail.css'
 
 const JOB_TYPES = [
@@ -129,7 +130,7 @@ function RecruiterJobDetail() {
 
   if (loading) return (
     <main className="dashboard-content jd-page">
-      <p className="jd-loading">Loading job…</p>
+      <Loader text="Loading job…" size="lg" />
     </main>
   )
 

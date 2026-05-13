@@ -138,3 +138,11 @@
   color: #dc2626;
   font-size: 13px;
 }
+
+@media (max-width: 600px) {
+  .auth-links {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+}

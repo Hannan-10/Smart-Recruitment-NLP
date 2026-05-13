@@ -31,6 +31,11 @@ const applicationSchema = mongoose.Schema(
       skill_match: { type: Number },
       experience:  { type: Number },
     },
+    status: {
+      type: String,
+      enum: ['applied', 'shortlisted', 'interview', 'selected', 'rejected'],
+      default: 'applied',
+    },
   },
   { timestamps: true }
 );
